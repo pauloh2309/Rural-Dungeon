@@ -9,4 +9,5 @@ Lore: Um dia, um aluno que estava cansado de tanto reprovar, e com medo de ser j
 | pygame | criar a interface gráfica do jogo |
 | os | não sei |
 | time | acrescentar delay |
+| random | utilizado em alguns trechos de código para gerar valores aleatórios |
 
