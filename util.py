@@ -33,6 +33,13 @@ class Util:
         texto_recortado = texto.split()
         texto_junto = ' '.join(texto_recortado)
         for i in texto:
-            print(i, end='')
+            print(Fore.LIGHTWHITE_EX + i, end='')
             Util.pausa(0.05)
         print('\n')
+
+    def evento_bowser(var, var2, var3, var4):
+        print(Fore.LIGHTWHITE_EX + 'Evento: ' + Fore.LIGHTYELLOW_EX + '{}'.format(var))
+        print(Fore.LIGHTWHITE_EX + 'Tipo: ' + Fore.LIGHTYELLOW_EX + '{}'.format(var2))
+        print(Fore.LIGHTWHITE_EX + 'Efeito: ' + Fore.LIGHTYELLOW_EX + '{}'.format(var3))
+        print('')
+        Util.rpg_dialogo(var4)
