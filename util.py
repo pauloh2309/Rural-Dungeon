@@ -1,45 +1,23 @@
-from os import system, name
 from time import sleep
-from colorama import Fore, Back, Style, init
-
+from os import system, name
+from colorama import Fore, Style, init
 
 init(autoreset=True)
 
 class Util:
+
     def limpar_tela():
         system('cls' if name == 'nt' else 'clear')
-
+    
     def pausa(tempo):
         sleep(tempo)
 
-
-    def cabecalho(titulo):
-        print('\n')
-        print('=' * 100)
-        print(Fore.BLUE + '{:^100}'.format(titulo) + Fore.RESET)
-        print('=' * 100)
-
+    def reticencias():
+        for i in range(0,3):
+            print('.', end='') 
+            sleep(1)
+    def separacao_cabecalho():
+        print('=' * 50)
+        
     def continuar():
-        input(Fore.LIGHTMAGENTA_EX + '\nPressione ENTER para continuar')
-
-    def erro_txt(msg):
-        print(Fore.LIGHTRED_EX + '{}'.format(msg))
-
-    def certo_txt(msg):
-        print(Fore.LIGHTGREEN_EX + '{}'.format(msg))
-
-    def rpg_dialogo(texto):
-        cont = 0
-        texto_recortado = texto.split()
-        texto_junto = ' '.join(texto_recortado)
-        for i in texto:
-            print(Fore.LIGHTWHITE_EX + i, end='')
-            Util.pausa(0.05)
-        print('\n')
-
-    def evento_bowser(var, var2, var3, var4):
-        print(Fore.LIGHTWHITE_EX + 'Evento: ' + Fore.LIGHTYELLOW_EX + '{}'.format(var))
-        print(Fore.LIGHTWHITE_EX + 'Tipo: ' + Fore.LIGHTYELLOW_EX + '{}'.format(var2))
-        print(Fore.LIGHTWHITE_EX + 'Efeito: ' + Fore.LIGHTYELLOW_EX + '{}'.format(var3))
-        print('')
-        Util.rpg_dialogo(var4)
+        input(Fore.YELLOW + 'Pressione ENTER para continuar...' + Fore.RESET)
