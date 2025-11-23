@@ -7,7 +7,7 @@ Lore: Um dia, um aluno que estava cansado de tanto reprovar, e com medo de ser j
 | MÓDULOS | UTILIZAÇÃO |
 |---------|------------|
 | pygame | criar a interface gráfica do jogo |
-| os | não sei |
+| os | Utilizado para limpar o terminal |
 | time | acrescentar delay |
 | random | utilizado em alguns trechos de código para gerar valores aleatórios |
 
