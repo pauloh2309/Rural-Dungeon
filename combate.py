@@ -55,7 +55,7 @@ class Combate:
                             print(Fore.YELLOW + '2 - Ataque Leve (2 Estamina, +25 Carga)' + Fore.RESET)
                             print(Fore.RED + '3 - Ataque Pesado (3 Estamina, +35 Carga)' + Fore.RESET)
                             
-                            if self.p1.carga_especial == self.p1.carga_max_especial:
+                            if self.p1.carga_especial >= self.p1.carga_max_especial:
                                 print(Fore.LIGHTRED_EX + '4 - Ataque Especial (Disponível!)' + Fore.RESET)
                             else:
                                 print(Fore.BLACK + '4 - Ataque Especial (Carregue: {}/{})'.format(self.p1.carga_especial, self.p1.carga_max_especial) + Fore.RESET)
@@ -170,3 +170,10 @@ class Combate:
                 self.batalha.repurar_estatos_posbatalha(self.p1)
                 self.batalha.repurar_estatos_posbatalha(self.p2)
                 Util.limpar_tela()
+
+
+ele = personagem.Personagem("Saitama", 100, 10, 100000000000000000000000000000000000000000000000000, 5, 10.00, 5)
+ela = personagem.Personagem("Garou", vida=100, defesa=12, ataque=13, iniciativa=6, dinheiro=5.00, estamina=5)
+
+jogo = Combate(ele, ela)
+jogo.combate_pratico()
