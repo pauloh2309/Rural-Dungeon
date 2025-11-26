@@ -1,7 +1,8 @@
 from util import Util
 from colorama import Fore, Back, Style, init
 from random import randint
-from personagem import Personagem
+from personagem import Personagem, preco_ru
+from bowser import Bowser
 
 init(autoreset=True)
 
@@ -25,59 +26,45 @@ Recepcionista:
 
 Você:
 — Só um segundo, vou inspecionar minha carteira...
-'''}
-texto_comidas = [{'prato': '''
-Você se dirige ao balcão e recebe o prato do dia: frango grelhado, arroz soltinho e feijão fresquinho.
-
-Você:
-— Nossa… isso aqui tá com uma cara maravilhosa!
-
-Ao sentar-se, você começa a comer. O aroma e o sabor do frango bem temperado te animam imediatamente.
-
-Você:
-— Era exatamente disso que eu precisava… Sinto até minhas forças voltando.
-
-Conforme termina o prato, uma sensação de energia percorre seu corpo. Você se sente revitalizado(a) e pronto(a) para continuar sua jornada!
+'''
+, 'texto_sem_evento': '''
+Você:\r\n— Estou com tanta fome, felizmente estou perto do Restaurante Universitário.\r\n\r\n"Você caminha até a entrada do prédio. O fluxo de pessoas entrando e saindo é intenso."\r\n\r\nVocê:\r\n— Puxa, esqueci o dinheiro em casa. Voltar andando pra casa com essa fome...
+'''
+}
+texto_comidas = [
+    {'prato': '''
+"O prato de hoje é: Arroz, feijão, frango assado e purê de batata."
+Você:\r\n— Que delícia, isso vai me dar um gás!\r\n\r\n"Você devora o prato e sente suas energias se renovarem. Você sai do RU pronto para a próxima aventura."
 '''},
-{'prato': '''
-Você pega seu prato no balcão: macarrão quentinho coberto com um molho de tomate bem temperado e uma camada generosa de queijo derretido.
-
-Você:
-— Olha só isso… até brilha! Hora de recuperar as energias.
-
-A cada garfada, o sabor caseiro do molho parece aquecer seu coração.
-
-Você:
-— Ufa… isso revigora qualquer um. Estou me sentindo muito melhor!
-
-Ao terminar a refeição, você respira fundo, sentindo o corpo mais leve e a mente mais desperta. Energia renovada!
+    {'prato': '''
+"O prato de hoje é: Arroz, feijão, carne de porco e macarrão."
+Você:\r\n— Nada mal, a comida está quentinha.\r\n\r\n"Você termina a refeição e se sente revigorado, pronto para enfrentar os desafios."
 '''},
-{'prato': '''
-No balcão, você recebe um prato leve porém caprichado: alface crocante, tomate, pepino, cenoura ralada e uma colher de grão-de-bico. Acompanhado de um copo de suco natural gelado.
-
-Você:
-— Hm… saudável e bonito. Vamos ver se me dá um gás.
-
-Você começa a comer, sentindo a crocância e a leveza da refeição que refresca até a alma.
-
-Você:
-— Nossa… até parece que minha vida voltou ao corpo. Que sensação boa!
-
-Quando termina, percebe que o cansaço de antes foi embora. Você se sente renovado(a) e pronto(a) para o que vier!
+    {'prato': '''
+"O prato de hoje é: Arroz, feijão, bife e salada de alface."
+Você:\r\n— Nossa, que dia de sorte! Um bife suculento!\r\n\r\n"Após comer, sua barriga está cheia e sua mente está clara. Você está pronto para o que vier."
 '''}]
 
 prato_aleatorio = texto_comidas[randint(0, 2)]['prato']
 
-def restaurante_univ():
+def restaurante_univ(heroi):
     Util.limpar_tela()
-    jogador_dinheiro = jogador['dinheiro']
+    jogador_dinheiro = heroi.dinheiro 
     Util.rpg_dialogo(texto_ru['texto_chegando_ru'])
     Util.continuar()
     Util.limpar_tela()
     print(Fore.LIGHTYELLOW_EX + 'Você tem R$ {:.2f}.'.format(jogador_dinheiro))
-    if jogador_dinheiro < 3.50:
+    
+    
+    if jogador_dinheiro < preco_ru:
         Util.erro_txt('Você não tem dinheiro suficiente, vá trabalhar, seu vagabundo!')
-        return #Menu!
+        if heroi.econtrou_bowser == 0:
+            bowser_event = Bowser(heroi)
+            bowser_event.rola_roleta(bowser_event.bowser_texto[0]['aparição'])
+            heroi.econtrou_bowser = 1 
+        else:
+             Util.rpg_dialogo(texto_ru['texto_sem_evento'])
+        return 
     
     else:
         Util.certo_txt('Você tem dinheiro suficiente, não está liso!')
@@ -87,19 +74,24 @@ def restaurante_univ():
             return 
         if comer == 's':
             Util.limpar_tela()
-            Util.certo_txt('Você comprou o ticket e está pronto para almoçar!')
-            jogador_dinheiro -= 3.50
-            jogador['dinheiro'] = jogador_dinheiro
+            
+            heroi.vida = heroi.vidabase
+            heroi.estamina = heroi.estaminabase
+            Util.certo_txt(f'Você comprou o ticket e está pronto para almoçar! Vida ({heroi.vida}/{heroi.vidabase}) e Estamina ({heroi.estamina}/{heroi.estaminabase}) restauradas ao máximo!')
+            
+            heroi.pagar_ru()
+            
+            Util.rpg_dialogo(prato_aleatorio)
+            
+            if heroi.econtrou_bowser == 1:
+                bowser_event = Bowser(heroi)
+                bowser_event.rola_roleta(bowser_event.bowser_texto[1]['re-aparição'])
+            
         elif comer == 'n':
             Util.limpar_tela()
-            print(Fore.LIGHTCYAN_EX + 'Sério? Você percorreu todo esse caminho para sair de mãos abanando?')
-            return
+            print(Fore.LIGHTCYAN_EX + 'Sério? Você percorreu todo esse caminho... ' + Fore.RESET)
+            Util.pausa(2)
         else:
-            Util.erro_txt('Escolha apenas entre umas das opções disponibilizadas!')
-            return
-    Util.rpg_dialogo(prato_aleatorio)
-
-        # Colocar a função do jogador restaurando sua vida
-
-restaurante_univ()
-print(jogador['dinheiro'])
+            Util.erro_txt('Opção inválida, voltando ao menu.')
+            Util.pausa(2)
+        return

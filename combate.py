@@ -11,17 +11,28 @@ class Combate:
         self.p2 = p2
         self.batalha = Batalha()
         self.p = personagem
+        self.defesa_aprimorada_p1 = False
+        self.defesa_aprimorada_p2 = False
+        self.bonus_defesa = 20
 
     def dados_idimigo(self):
-        if self.p2.carga_especial == self.p2.carga_max_especial:
+        if self.p2.carga_especial >= self.p2.carga_max_especial:
             return 4 
-        return random.choice([1, 1, 1, 2, 2, 3, 5, 5]) 
+        return random.choice([1, 1, 1, 2, 2, 3, 5, 5, 5]) 
 
     def combate_pratico(self):
             turno = 1
             
             while self.p1.vida > 0 and self.p2.vida > 0:
                 
+                if self.defesa_aprimorada_p1:
+                    self.p1.defesa -= self.bonus_defesa
+                    self.defesa_aprimorada_p1 = False
+                    
+                if self.defesa_aprimorada_p2:
+                    self.p2.defesa -= self.bonus_defesa
+                    self.defesa_aprimorada_p2 = False
+
                 print(f'\n===== TURNO {turno} =====')
                 
                 print(Fore.GREEN + f'{self.p1.nome}: Vida {self.p1.vida}/{self.p1.vidabase}, Ataque {self.p1.ataque}, Defesa {self.p1.defesa}, Estamina {self.p1.estamina}/{self.p1.estaminabase}, Carga Especial {self.p1.carga_especial}/{self.p1.carga_max_especial}' + Fore.RESET)
@@ -33,7 +44,7 @@ class Combate:
                 while acao_p1 == 0:
                     print('Escolha o número desejado:')
                     print(Fore.CYAN + '1 - Atacar' + Fore.RESET)
-                    print(Fore.BLUE + '2 - Se Defender (Recupera 2 Estamina)' + Fore.RESET)
+                    print(Fore.BLUE + f'2 - Se Defender (Recupera 2 Estamina, +{self.bonus_defesa} Defesa neste turno)' + Fore.RESET)
                     print(Fore.MAGENTA + '3 - Usar Trufa' + Fore.RESET)
                     print('0 - Limpar Tela (ver status novamente)')
                     
@@ -87,7 +98,7 @@ class Combate:
                                 sub_numero = 0
                         
                     elif numero1 == 2:
-                        acao_p1 = 5 
+                        acao_p1 = 5
                     elif numero1 == 3:
                         acao_p1 = 6
                     else:
@@ -108,6 +119,21 @@ class Combate:
                     else:
                          ordem_acao = [self.p2, self.p1]
                          
+                
+                if acao_p1 == 5:
+                    self.p1.defesa += self.bonus_defesa
+                    self.defesa_aprimorada_p1 = True
+                    
+                if acao_p2 == 5:
+                    self.p2.defesa += self.bonus_defesa
+                    self.defesa_aprimorada_p2 = True
+
+                Util.limpar_tela()
+                print(f'\n===== TURNO {turno} =====')
+                print(Fore.GREEN + f'{self.p1.nome}: Vida {self.p1.vida}/{self.p1.vidabase}, Ataque {self.p1.ataque}, **Defesa {self.p1.defesa}**, Estamina {self.p1.estamina}/{self.p1.estaminabase}, Carga Especial {self.p1.carga_especial}/{self.p1.carga_max_especial}' + Fore.RESET)
+                print(Fore.RED + f'{self.p2.nome}: Vida {self.p2.vida}/{self.p2.vidabase}, Ataque {self.p2.ataque}, **Defesa {self.p2.defesa}**, Estamina {self.p2.estamina}/{self.p2.estaminabase}, Carga Especial {self.p2.carga_especial}/{self.p2.carga_max_especial}' + Fore.RESET)
+                Util.separacao_cabecalho()
+                
                 for personagem_atual in ordem_acao:
                     
                     if self.p1.vida <= 0 or self.p2.vida <= 0:
@@ -147,7 +173,7 @@ class Combate:
                                 acao = 5 
 
                     if acao == 5:
-                        print(Fore.BLUE + f'{atacante.nome} defende e recupera 2 de estamina!' + Fore.RESET)
+                        print(Fore.BLUE + f'{atacante.nome} defende e recupera 2 de estamina! (Defesa aprimorada neste turno)' + Fore.RESET)
                         atacante.estamina = min(atacante.estaminabase, atacante.estamina + 2)
                         Util.pausa(2)
                         
@@ -155,12 +181,18 @@ class Combate:
                         self.batalha.usar_trufa(atacante)
                 
                 if self.p1.vida <= 0:
+                    if self.defesa_aprimorada_p1: self.p1.defesa -= self.bonus_defesa
+                    if self.defesa_aprimorada_p2: self.p2.defesa -= self.bonus_defesa
+                    
                     self.batalha.repurar_estatos_posbatalha(self.p2)
                     Util.limpar_tela()
                     print(Fore.RED + '{:^50}'.format(f'FIM DA LUTA! {self.p2.nome} VENCEU') + Fore.RESET)
                     return False
                     
                 elif self.p2.vida <= 0:
+                    if self.defesa_aprimorada_p1: self.p1.defesa -= self.bonus_defesa
+                    if self.defesa_aprimorada_p2: self.p2.defesa -= self.bonus_defesa
+                    
                     self.batalha.repurar_estatos_posbatalha(self.p1)
                     Util.limpar_tela()
                     print(Fore.GREEN + '{:^50}'.format(f'FIM DA LUTA! {self.p1.nome} VENCEU') + Fore.RESET)
@@ -170,10 +202,3 @@ class Combate:
                 self.batalha.repurar_estatos_posbatalha(self.p1)
                 self.batalha.repurar_estatos_posbatalha(self.p2)
                 Util.limpar_tela()
-
-
-ele = personagem.Personagem("Saitama", 100, 10, 100000000000000000000000000000000000000000000000000, 5, 10.00, 5)
-ela = personagem.Personagem("Garou", vida=100, defesa=12, ataque=13, iniciativa=6, dinheiro=5.00, estamina=5)
-
-jogo = Combate(ele, ela)
-jogo.combate_pratico()

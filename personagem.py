@@ -4,7 +4,7 @@ preco_trufa = 1.50
 preco_ru = 3.50
 
 class Personagem:
-    def __init__(self, nome, vida, defesa, ataque, iniciativa,dinheiro, estamina):
+    def __init__(self, nome, vida, defesa, ataque, iniciativa,dinheiro, estamina, econtrou_bowser=0):
         self.nome = nome
         self.defesa = defesa
         self.ataque = ataque
@@ -16,6 +16,7 @@ class Personagem:
         self.dinheiro = dinheiro
         self.estamina = estamina
         self.estaminabase = estamina
+        self.econtrou_bowser = econtrou_bowser
 
         self.carga_especial = 0
         self.carga_max_especial = 100
@@ -45,13 +46,8 @@ class Personagem:
     def comprar_trufa(self, nome_trufa, valor_trufa):
         if self.dinheiro >= valor_trufa:
             self.dinheiro -= valor_trufa
-            self.adicionar_item(nome_trufa)
-            return True
-        else:
-            return False
-        
-    def ganhar(self, valor):
-        self.dinheiro += valor
-
-    def adicionar_item(self, nome_trufa):
-        pass
+            for trufa in self.trufa:
+                if trufa['nome'] == nome_trufa:
+                    trufa['qnt'] += 1
+                    return True
+        return False
