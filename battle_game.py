@@ -1,14 +1,8 @@
 import pygame
 import pygame_gui
-from pygame_gui.elements import UIButton, UIImage, UILabel, UITextBox, UIProgressBar
+from pygame_gui.elements import UIButton, UIImage, UITextBox
 from pygame.rect import Rect
 
-<<<<<<< Updated upstream
-=======
-# ------------------------------------------------------
-# CONFIGURAÇÃO GERAL
-# ------------------------------------------------------
->>>>>>> Stashed changes
 WIDTH, HEIGHT = 960, 640
 FPS = 60
 
@@ -19,12 +13,6 @@ clock = pygame.time.Clock()
 
 manager = pygame_gui.UIManager((WIDTH, HEIGHT))
 
-<<<<<<< Updated upstream
-=======
-# ------------------------------------------------------
-# SISTEMA DE ESTADOS
-# ------------------------------------------------------
->>>>>>> Stashed changes
 class GameState:
     def __init__(self, game):
         self.game = game
@@ -36,7 +24,7 @@ class GameState:
         for el in self.ui_elements:
             try:
                 el.kill()
-            except:
+            except Exception:
                 pass
         self.ui_elements = []
 
@@ -44,37 +32,24 @@ class GameState:
     def update(self, dt): pass
     def render(self, surface): pass
 
-
 class Game:
     def __init__(self):
         self.running = True
         self.states = {}
         self.state = None
 
-<<<<<<< Updated upstream
-=======
-        # Dados do player
->>>>>>> Stashed changes
         self.player = {
             "name": "Firerat",
             "hp": 100,
             "max_hp": 100
         }
 
-<<<<<<< Updated upstream
-=======
-        # Dados do inimigo
->>>>>>> Stashed changes
         self.enemy = {
             "name": "Goblin Selvagem",
             "hp": 120,
             "max_hp": 120
         }
 
-<<<<<<< Updated upstream
-=======
-        # Registrar telas
->>>>>>> Stashed changes
         self.register_state("menu", MenuState(self))
         self.register_state("battle", BattleState(self))
 
@@ -92,41 +67,28 @@ class Game:
     def quit(self):
         self.running = False
 
-<<<<<<< Updated upstream
 class MenuState(GameState):
 
     def enter(self):
-        self.bg = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/ceagri menu.jpg").convert()
-        self.bg = pygame.transform.scale(self.bg, (WIDTH, HEIGHT))
-        self.logo = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/f183fbea-b22f-4728-ba31-1180764de368.jpg").convert_alpha()
-        self.logo = pygame.transform.scale(self.logo, (350, 140))
-=======
-# ------------------------------------------------------
-# MENU INICIAL
-# ------------------------------------------------------
-class MenuState(GameState):
+        try:
+            self.bg = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/ceagri menu.jpg").convert()
+            self.bg = pygame.transform.scale(self.bg, (WIDTH, HEIGHT))
+        except Exception:
+            self.bg = pygame.Surface((WIDTH, HEIGHT))
+            self.bg.fill((30, 30, 30))
 
-    def enter(self):
-        # Background
-        self.bg = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/ceagri menu.jpg").convert()
-        self.bg = pygame.transform.scale(self.bg, (WIDTH, HEIGHT))
+        try:
+            self.logo = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/f183fbea-b22f-4728-ba31-1180764de368.jpg").convert_alpha()
+            self.logo = pygame.transform.scale(self.logo, (350, 140))
+            self.logo_ui = UIImage(
+                relative_rect=Rect((WIDTH//2 - 175, 40), (350, 140)),
+                image_surface=self.logo,
+                manager=manager
+            )
+            self.ui_elements.append(self.logo_ui)
+        except Exception:
+            pass
 
-        # Logo
-        self.logo = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/f183fbea-b22f-4728-ba31-1180764de368.jpg").convert_alpha()
-        self.logo = pygame.transform.scale(self.logo, (350, 140))
-
->>>>>>> Stashed changes
-        self.logo_ui = UIImage(
-            relative_rect=Rect((WIDTH//2 - 175, 40), (350, 140)),
-            image_surface=self.logo,
-            manager=manager
-        )
-        self.ui_elements.append(self.logo_ui)
-
-<<<<<<< Updated upstream
-=======
-        # Botões
->>>>>>> Stashed changes
         self.btn_play = UIButton(
             Rect(WIDTH//2 - 100, 250, 200, 50),
             "JOGAR",
@@ -150,93 +112,38 @@ class MenuState(GameState):
 
     def handle_event(self, event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-
             if event.ui_element == self.btn_play:
                 self.game.change_state("battle")
-
             if event.ui_element == self.btn_exit:
                 self.game.quit()
 
     def render(self, surface):
         surface.blit(self.bg, (0, 0))
 
-<<<<<<< Updated upstream
 class BattleState(GameState):
 
     def enter(self):
-=======
-# ------------------------------------------------------
-# TELA DE BATALHA (ESTILO POKÉMON)
-# ------------------------------------------------------
-class BattleState(GameState):
-
-    def enter(self):
-        # ------------------------------------------------------
-        # 🔥 BACKGROUND
-        # ------------------------------------------------------
->>>>>>> Stashed changes
         try:
             self.battle_bg = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/corredor-da-escola-corredor-da-faculdade-ou-universidade_107791-2122.jpg").convert()
             self.battle_bg = pygame.transform.scale(self.battle_bg, (WIDTH, HEIGHT))
-        except:
+        except Exception:
             self.battle_bg = pygame.Surface((WIDTH, HEIGHT))
             self.battle_bg.fill((80, 120, 80))
 
-<<<<<<< Updated upstream
-=======
-        # ------------------------------------------------------
-        # 🔥 SPRITE DO PLAYER
-        # ------------------------------------------------------
->>>>>>> Stashed changes
         try:
             img = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/bloggif_frames_gif/frame-4.gif").convert_alpha()
             self.player_sprite = pygame.transform.scale(img, (250, 250))
-        except:
+        except Exception:
             self.player_sprite = pygame.Surface((250, 250))
             self.player_sprite.fill((200, 80, 80))
 
-<<<<<<< Updated upstream
-=======
-        # ------------------------------------------------------
-        # 🔥 SPRITE DO INIMIGO
-        # ------------------------------------------------------
->>>>>>> Stashed changes
         try:
             img = pygame.image.load("C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/Personagens do Rural Dungeon/cca808b0-22bb-43e0-868d-28714d6c5a0f-removebg-preview.png").convert_alpha()
             self.enemy_sprite = pygame.transform.scale(img, (250, 250))
-        except:
+        except Exception:
             self.enemy_sprite = pygame.Surface((250, 250))
             self.enemy_sprite.fill((80, 200, 80))
 
-<<<<<<< Updated upstream
-=======
-        # ------------------------------------------------------
-        # BARRAS DE VIDA (CRIAR AQUI!!!)
-        # ------------------------------------------------------
->>>>>>> Stashed changes
-        self.hp_player = UIProgressBar(
-            Rect(100, 480, 300, 25),
-            manager=manager
-        )
-        self.ui_elements.append(self.hp_player)
-
-        self.hp_enemy = UIProgressBar(
-            Rect(550, 80, 300, 25),
-            manager=manager
-        )
-        self.ui_elements.append(self.hp_enemy)
-
-<<<<<<< Updated upstream
-        self.update_bars()
-
-=======
-        # Inicializa HP correto
-        self.update_bars()
-
-        # ------------------------------------------------------
-        # CAIXA DE TEXTO
-        # ------------------------------------------------------
->>>>>>> Stashed changes
         self.textbox = UITextBox(
             html_text="<b>A batalha começou!</b>",
             relative_rect=Rect(50, 520, 860, 100),
@@ -244,12 +151,6 @@ class BattleState(GameState):
         )
         self.ui_elements.append(self.textbox)
 
-<<<<<<< Updated upstream
-=======
-        # ------------------------------------------------------
-        # BOTÃO DE ATAQUE
-        # ------------------------------------------------------
->>>>>>> Stashed changes
         self.btn_attack = UIButton(
             Rect(400, 430, 200, 50),
             "ATACAR",
@@ -257,34 +158,19 @@ class BattleState(GameState):
         )
         self.ui_elements.append(self.btn_attack)
 
-<<<<<<< Updated upstream
     def update_bars(self):
-=======
-    # ------------------------------------------------------
-    # 🔥 ATUALIZA BARRAS — VERSÃO 0.6.14
-    # ------------------------------------------------------
-    def update_bars(self):
-        # valor deve ser entre 0.0 e 1.0
->>>>>>> Stashed changes
-        player_percent = self.game.player["hp"] / self.game.player["max_hp"]
-        enemy_percent = self.game.enemy["hp"] / self.game.enemy["max_hp"]
+        player_percent = max(0.0, min(1.0, self.game.player["hp"] / self.game.player["max_hp"]))
+        enemy_percent = max(0.0, min(1.0, self.game.enemy["hp"] / self.game.enemy["max_hp"]))
+        self._player_pct = player_percent
+        self._enemy_pct = enemy_percent
 
-        self.hp_player.set_current_progress(player_percent)
-        self.hp_enemy.set_current_progress(enemy_percent)
-
-<<<<<<< Updated upstream
-=======
-    # ------------------------------------------------------
->>>>>>> Stashed changes
     def handle_event(self, event):
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             if event.ui_element == self.btn_attack:
                 self.player_attack()
+        if event.type == pygame.USEREVENT + 1:
+            self.enemy_attack()
 
-<<<<<<< Updated upstream
-=======
-    # ------------------------------------------------------
->>>>>>> Stashed changes
     def player_attack(self):
         damage = 20
         self.game.enemy["hp"] -= damage
@@ -294,13 +180,11 @@ class BattleState(GameState):
         self.update_bars()
         self.textbox.set_text(f"Você causou {damage} de dano!")
 
-        pygame.time.set_timer(pygame.USEREVENT + 1, 900, True)
+        pygame.time.set_timer(pygame.USEREVENT + 1, 900, loops=1)
 
-<<<<<<< Updated upstream
-=======
-    # ------------------------------------------------------
->>>>>>> Stashed changes
     def enemy_attack(self):
+        if self.game.player["hp"] <= 0:
+            return
         damage = 18
         self.game.player["hp"] -= damage
         if self.game.player["hp"] < 0:
@@ -308,31 +192,32 @@ class BattleState(GameState):
 
         self.update_bars()
         self.textbox.set_text(f"O inimigo causou {damage} de dano!")
-<<<<<<< Updated upstream
-=======
 
-    # ------------------------------------------------------
->>>>>>> Stashed changes
     def update(self, dt):
-        for event in pygame.event.get(pygame.USEREVENT + 1):
-            self.enemy_attack()
 
-<<<<<<< Updated upstream
-=======
-    # ------------------------------------------------------
->>>>>>> Stashed changes
+        pass
+
     def render(self, surface):
         surface.blit(self.battle_bg, (0, 0))
         surface.blit(self.player_sprite, (100, 250))
         surface.blit(self.enemy_sprite, (600, 150))
 
-<<<<<<< Updated upstream
-=======
+        self.update_bars()
 
-# ------------------------------------------------------
-# LOOP PRINCIPAL
-# ------------------------------------------------------
->>>>>>> Stashed changes
+        pygame.draw.rect(surface, (60, 60, 60), (100, 480, 300, 25))
+
+        pygame.draw.rect(surface, (0, 200, 0), (100, 480, int(300 * self._player_pct), 25))
+
+        font = pygame.font.SysFont(None, 20)
+        txt = font.render(f"{self.game.player['hp']}/{self.game.player['max_hp']}", True, (255,255,255))
+        surface.blit(txt, (100 + 5, 480 - 20))
+
+        pygame.draw.rect(surface, (60, 60, 60), (550, 80, 300, 25))
+        fill_width = int(300 * self._enemy_pct)
+        pygame.draw.rect(surface, (200, 0, 0), (550 + (300 - fill_width), 80, fill_width, 25))
+        txt_e = font.render(f"{self.game.enemy['hp']}/{self.game.enemy['max_hp']}", True, (255,255,255))
+        surface.blit(txt_e, (550 + 5, 80 - 20))
+
 game = Game()
 
 while game.running:
@@ -342,13 +227,17 @@ while game.running:
         if event.type == pygame.QUIT:
             game.running = False
 
-        game.state.handle_event(event)
+        if game.state:
+            game.state.handle_event(event)
+
         manager.process_events(event)
 
-    game.state.update(dt)
+    if game.state:
+        game.state.update(dt)
     manager.update(dt)
 
-    game.state.render(window)
+    if game.state:
+        game.state.render(window)
     manager.draw_ui(window)
 
     pygame.display.update()
