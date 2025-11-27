@@ -6,8 +6,8 @@ init(autoreset=True)
 
 class Heroi(Personagem):
 
-    def __init__(self, nome='', vida=1, defesa=1, ataque=1, iniciativa=0, dinheiro_inicial=10.5, estamina=1):
-        super().__init__(nome, vida, defesa, ataque, iniciativa, dinheiro_inicial, estamina)
+    def __init__(self, nome='', vida=1, defesa=1, ataque=1, iniciativa=0, dinheiro_inicial=10.5, estamina=1, econtrou_bowser=0):
+        super().__init__(nome, vida, defesa, ataque, iniciativa, dinheiro_inicial, estamina, econtrou_bowser)
 
 
     def personalizacao(self):
@@ -25,18 +25,23 @@ class Heroi(Personagem):
                 defesa = int(input('Pontos em Defesa: '))
                 vida = int(input('Pontos em Vida: '))
                 iniciativa = int(input('Pontos em Iniciativa: ')) 
-                estamina = int(input('Pontos de estamina'))
+                estamina = int(input('Pontos de estamina: '))
             except ValueError:
-                print(Fore.RED + 'Erro: Adicione apenas números positivos inteiros!' + Fore.RESET)
+                Util.erro_txt('Erro: Adicione apenas números positivos inteiros!')
                 Util.pausa(3)
                 continue
             
             soma_status = ataque + defesa + vida + iniciativa + estamina
             
             if soma_status > 120:
-                print(Fore.RED + 'Seus pontos de status totais superam o limite permitido (120)!' + Fore.RESET)
-            elif ataque < 1 or defesa < 1 or vida < 1 or iniciativa < 1:
-                print(Fore.RED + 'Cada status deve conter, no mínimo, 1 ponto!' + Fore.RESET)
+                Util.erro_txt(f'Seus pontos de status totais superam o limite permitido (120)! Você usou {soma_status} pontos.')
+                Util.pausa(3)
+            elif soma_status < 120:
+                Util.erro_txt(f'Seus pontos de status totais estão abaixo do limite permitido (120)! Você usou {soma_status} pontos.')
+                Util.pausa(3)
+            elif ataque < 1 or defesa < 1 or vida < 1 or iniciativa < 1 or estamina < 1:
+                Util.erro_txt('Cada status deve conter, no mínimo, 1 ponto!')
+                Util.pausa(3)
             else:
                 self.nome = str(input(Style.BRIGHT + 'Insira o nome do seu herói: ' + Style.NORMAL).strip().capitalize())
                 self.ataque = ataque
@@ -47,6 +52,7 @@ class Heroi(Personagem):
                 self.ataquebase = ataque
                 self.defesabase = defesa
                 self.estamina = estamina
+                self.estaminabase = estamina
 
                 
                 print(Fore.GREEN + f'\nHerói {self.nome} criado com sucesso!' + Fore.RESET)

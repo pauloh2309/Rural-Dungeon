@@ -11,15 +11,17 @@ class Batalha:
         pass
 
     def calcular_reducao_ativa(self, defensor):
-        """Calcula a redução de dano aleatória APENAS se o personagem escolheu defender."""
         chance = random.randint(1, 100)
         
-        if chance <= 20:
+        if chance <= 10:
             print(Fore.BLUE + f'{defensor.nome} se defendeu totalmente! Dano reduzido em 100%.' + Fore.RESET)
             return 1.0 
-        elif chance <= 50:
+        elif chance <= 20:
             print(Fore.CYAN + f'{defensor.nome} se defendeu parcialmente! Dano reduzido em 50%.' + Fore.RESET)
             return 0.5 
+        elif chance <= 30:
+            print(Fore.CYAN + f'{defensor.nome} se defendeu parcialmente! Dano reduzido em 30%.' + Fore.RESET)
+            return 0.3 
         else:
             return 0.0 
 
@@ -42,7 +44,7 @@ class Batalha:
             multiplicador_sorte = random.uniform(normal_min_multi, normal_max_multi)
             mensagem_sorte = Fore.WHITE + f'Dano normal com variação (x{multiplicador_sorte:.2f})' + Fore.RESET
         
-        dano_bruto = int(dano_base * multiplicador_sorte)
+        dano_bruto = int(dano_base * multiplicador_sorte) 
         dano_bruto = max(1, dano_bruto)
         
         print(mensagem_sorte)
@@ -56,14 +58,18 @@ class Batalha:
             print(Fore.MAGENTA + f'{atacante.nome} ganhou {valor} de Carga Especial! ({atacante.carga_especial}/{atacante.carga_max_especial})' + Fore.RESET)
 
     def aplicar_dano(self, atacante, defensor, dano_bruto, defensor_defendeu=False):
-        reducao_dano = 0.0
+        reducao_dano_ativa = 0.0
         
         if defensor_defendeu:
-            reducao_dano = self.calcular_reducao_ativa(defensor)
+            reducao_dano_ativa = self.calcular_reducao_ativa(defensor) 
+            
         elif dano_bruto > 0:
             print(Fore.YELLOW + f'{defensor.nome} nao estava defendendo ativamente. Sem chance de mitigacao aleatoria.' + Fore.RESET)
 
-        dano_final = int(dano_bruto * (1.0 - reducao_dano))
+        dano_apos_reducao_ativa = dano_bruto * (1.0 - reducao_dano_ativa)
+        
+        dano_final = int(dano_apos_reducao_ativa)
+        
         dano_final = max(1, dano_final) if dano_bruto > 0 and dano_final == 0 else max(0, dano_final)
         
         defensor.vida -= dano_final
@@ -212,7 +218,6 @@ class Batalha:
             personagem.ataque = personagem.ataquebase
             personagem.defesa = personagem.defesabase
             personagem.estamina = personagem.estaminabase
-            personagem.carga_especial = 0
             Batalha.usadas_em_batalha = {'Trufa de limão': False, 'Trufa de maracujá': False, 'Trufa de chocolate': False, 'Trufa de café': False, 'Trufa de Hortelã': False, 'Trufa de Coco': False}
             return personagem.defesa, personagem.ataque, personagem.vida, personagem.estamina
     
