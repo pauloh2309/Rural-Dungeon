@@ -1,6 +1,5 @@
 from personagem import Personagem
 from heroi import Heroi
-from dialogo import Dialogos, texto
 from util import Util
 
 def verificar_final(npc1, npc2, dialogos):
@@ -33,14 +32,6 @@ def verificar_final(npc1, npc2, dialogos):
 def main():
     heroi = Heroi()
     heroi.personalizacao()
-    
-    edran = Personagem('Edran', 40, 10, 50, 0, 1) 
-    kael = Personagem('Kael', 55, 25, 20, 0, 1) 
-    
-    dialogo_jogo = Dialogos(texto, heroi, edran, kael)
-    dialogo_jogo.introducao()
-    
-    verificar_final(edran, kael, dialogo_jogo)
 
 if __name__ == "__main__":
     

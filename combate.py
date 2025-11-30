@@ -202,3 +202,10 @@ class Combate:
                 self.batalha.repurar_estatos_posbatalha(self.p1)
                 self.batalha.repurar_estatos_posbatalha(self.p2)
                 Util.limpar_tela()
+
+
+ele = personagem.Personagem("Saitama", vida=100, defesa=10, ataque=15, iniciativa=5, dinheiro=10.00, estamina=5)
+ela = personagem.Personagem("garou", vida=100, defesa=12, ataque=13, iniciativa=6, dinheiro=5.00, estamina=5)
+
+jogo = Combate(ele, ela)
+jogo.combate_pratico()

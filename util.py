@@ -11,6 +11,9 @@ class Util:
 
     def pausa(tempo):
         sleep(tempo)
+    
+    def separacao_cabecalho():
+        print('=' * 50)
 
 
     def cabecalho(titulo):
