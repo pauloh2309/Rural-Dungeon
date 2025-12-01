@@ -1,4 +1,4 @@
-from personagem import Personagem
+from personagem1 import Personagem
 from colorama import Fore, Style, init
 from util import Util
 
