@@ -33,7 +33,8 @@ def draw_painel():
 
 #classe Personagem
 class Personagem():
-    def _init_(self, x, y nome, max_vida)
+    def __init__(self, x, y, nome, max_vida):
+        pass
 
 
 

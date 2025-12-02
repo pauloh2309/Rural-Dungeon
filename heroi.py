@@ -6,8 +6,12 @@ init(autoreset=True)
 
 class Heroi(Personagem):
 
-    def __init__(self, nome='', vida=1, defesa=1, ataque=1, iniciativa=0, dinheiro_inicial=10.5, estamina=1, econtrou_bowser=0):
+    def __init__(self, nome='', vida=1, defesa=1, ataque=1, iniciativa=0, dinheiro_inicial=10.5, estamina=1, econtrou_bowser=0, xp = 0, xp_max = 100, nivel = 1):
         super().__init__(nome, vida, defesa, ataque, iniciativa, dinheiro_inicial, estamina, econtrou_bowser)
+        self.xp = xp
+        self.xp_max = xp_max
+        self.nivel = nivel
+        self.nivel_atual = 
 
 
     def personalizacao(self):
@@ -58,3 +62,12 @@ class Heroi(Personagem):
                 print(Fore.GREEN + f'\nHerói {self.nome} criado com sucesso!' + Fore.RESET)
                 Util.pausa(2)
                 break
+    def ganho_xp(self, quantidade):
+        self.xp += quantidade
+        if self.xp >= self.xp_max:
+            self.nivel += 1
+            self.xp -= self.xp_max
+            self.xp_max = int(self.xp_max * 1.25)
+
+    def pontos_nivel(self):
+
