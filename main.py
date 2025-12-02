@@ -1,47 +1,58 @@
-from personagem import Personagem
-from heroi import Heroi
-from dialogo import Dialogos, texto
-from util import Util
+import pygame
 
-def verificar_final(npc1, npc2, dialogos):
-    estatos_vivos = 0
-    if npc1.estatos == 1:
-        estatos_vivos += 1
-    if npc2.estatos == 1:
-        estatos_vivos += 1
+pygame.init()
 
-    Util.limpar_tela()
-    Util.separacao_cabecalho()
-    print("{:^70}".format("FIM DA AVENTURA"))
-    Util.separacao_cabecalho()
+clock = pygame.time.Clock()
+fps = 60
 
-    if estatos_vivos == 2:
-        print("{:^70}".format("FINAL BOM"))
-        dialogos.dialogo_heroi_npc(dialogos.finais[0]['Bom'])
-    elif estatos_vivos == 1:
-        print("{:^70}".format("FINAL MEDIANO"))
-        if npc1.estatos == 2 and npc2.estatos == 1:
-            dialogos.dialogo_heroi_npc(dialogos.finais[1]['medio_edran'])
-        elif npc1.estatos == 1 and npc2.estatos == 2:
-            dialogos.dialogo_heroi_npc(dialogos.finais[2]['medio_kael'])
-    else: 
-        print("{:^70}".format("FINAL RUIM"))
-        dialogos.dialogo_heroi_npc(dialogos.finais[3]['ruim'])
-    
-    Util.pausa(5)
+#janela jogo
+bottom_panel = 335
+screen_windth = 1024
+screen_height = 720 + bottom_panel
 
-def main():
-    heroi = Heroi()
-    heroi.personalizacao()
-    
-    edran = Personagem('Edran', 40, 10, 50, 0, 1) 
-    kael = Personagem('Kael', 55, 25, 20, 0, 1) 
-    
-    dialogo_jogo = Dialogos(texto, heroi, edran, kael)
-    dialogo_jogo.introducao()
-    
-    verificar_final(edran, kael, dialogo_jogo)
+tela = pygame.display.set_mode((screen_windth, screen_height))
+pygame.display.set_caption("Batalha")
 
-if __name__ == "__main__":
-    
-    main()
+
+#carregar imagens
+#backgound imagem de fundo
+background_img = pygame.image.load('C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/background_do_jogo.png').convert_alpha()
+#painel img
+painel_img = pygame.image.load('C:/Users/pauli/OneDrive/Documentos/GitHub/Rural-Dungeon/imagens_game/painel.png').convert_alpha()
+
+
+
+#função para desenhar o background
+def draw_bg():
+    tela.blit(background_img, (0,0))
+
+#função para desenhar o painel
+def draw_painel():
+    tela.blit(painel_img, (0, screen_height - bottom_panel))
+
+
+#classe Personagem
+class Personagem():
+    def __init__(self, x, y, nome, max_vida):
+        pass
+
+
+
+run = True
+while run:
+
+    clock.tick(fps)
+
+    #desenhar background
+    draw_bg()
+
+    #dsenhar painel
+    draw_painel()
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+
+    pygame.display.update()        
+
+pygame.quit()
