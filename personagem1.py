@@ -51,3 +51,5 @@ class Personagem:
                     trufa['qnt'] += 1
                     return True
         return False
+    
+    
