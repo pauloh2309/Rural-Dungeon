@@ -1,7 +1,7 @@
 import random
 from batalha import Batalha
 from util import Util
-import personagem
+import personagem1
 from colorama import Fore, Style
 
 class Combate:
@@ -10,7 +10,7 @@ class Combate:
         self.p1 = p1
         self.p2 = p2
         self.batalha = Batalha()
-        self.p = personagem
+        self.p = personagem1
         self.defesa_aprimorada_p1 = False
         self.defesa_aprimorada_p2 = False
         self.bonus_defesa = 20

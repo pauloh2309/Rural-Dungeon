@@ -1,7 +1,7 @@
 from util import Util
 from colorama import Fore, Back, Style, init
 from random import randint
-from personagem import Personagem, preco_ru
+from personagem1 import Personagem, preco_ru
 from bowser import Bowser
 
 init(autoreset=True)
