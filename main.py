@@ -95,6 +95,65 @@ def save_personagem_file(heroi, path='save_personagem.json'):
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
+def save_hero_individual(heroi, folder='heroes'):
+    """Save each created hero into a separate file so they can be selected later."""
+    try:
+        os.makedirs(folder, exist_ok=True)
+        # safe filename: name + timestamp
+        import time
+        safe_name = ''.join(c for c in heroi.nome if c.isalnum() or c in (' ', '_')).strip().replace(' ', '_')
+        filename = f'{safe_name}_{int(time.time())}.json'
+        path = os.path.join(folder, filename)
+        data = {
+            'nome': heroi.nome,
+            'vida': heroi.vida,
+            'defesa': heroi.defesa,
+            'ataque': heroi.ataque,
+            'iniciativa': heroi.iniciativa,
+            'estamina': heroi.estamina,
+            'dinheiro': getattr(heroi, 'dinheiro', 10.5),
+            'nivel': getattr(heroi, 'nivel', 1),
+            'xp': getattr(heroi, 'xp', 0)
+        }
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        return path
+    except Exception:
+        return None
+
+
+def list_saved_heroes(folder='heroes'):
+    """Return list of saved hero files (path, metadata).
+
+    Each item: (path, data_dict)
+    """
+    res = []
+    if not os.path.exists(folder):
+        return res
+    for name in sorted(os.listdir(folder)):
+        if name.lower().endswith('.json'):
+            path = os.path.join(folder, name)
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                res.append((path, data))
+            except Exception:
+                continue
+    return res
+
+
+def start_game_with_heroi(heroi):
+    """Placeholder: integrate with actual game loop later.
+
+    For now: save selected hero into `save_heroi.json` and `save_personagem.json`
+    and print a confirmation via Util.
+    """
+    save_heroi_to_file(heroi)
+    save_personagem_file(heroi)
+    Util.certo_txt(f'Iniciando jogo com {heroi.nome}...')
+    Util.pausa(1)
+
+
 def hero_creation_screen(screen):
     clock = pygame.time.Clock()
 
@@ -368,6 +427,64 @@ def hero_creation_screen(screen):
     return None
 
 
+def hero_selection_screen(screen):
+    """Display a list of saved heroes and return a Heroi instance when one is selected.
+
+    If no saved heroes exist, shows a message and returns None when the user cancels.
+    """
+    clock = pygame.time.Clock()
+    files = list_saved_heroes()
+    idx = 0
+    offset_y = 140
+    running = True
+    while running:
+        clock.tick(FPS)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return None
+            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                pos = event.pos
+                # check each displayed hero box
+                for i, (path, data) in enumerate(files):
+                    y = offset_y + i * 84
+                    box = Rect(60, y, SCREEN_W - 120, 72)
+                    if box.collidepoint(pos):
+                        # create Heroi from data
+                        try:
+                            h = Heroi(nome=data.get('nome',''), vida=data.get('vida',1), defesa=data.get('defesa',1), ataque=data.get('ataque',1), iniciativa=data.get('iniciativa',0), dinheiro_inicial=data.get('dinheiro',10.5), estamina=data.get('estamina',1))
+                            return h
+                        except Exception:
+                            continue
+                # back button
+                if Rect(880, 40, 100, 40).collidepoint(pos):
+                    return None
+
+        # draw
+        screen.fill((18,18,30))
+        draw_text(screen, 'Selecionar Heroi', 44, 40, 30, color=WHITE)
+        # draw list
+        if not files:
+            draw_text(screen, 'Nenhum herói salvo encontrado.', 28, 60, offset_y, color=WHITE)
+            draw_text(screen, 'Crie um herói primeiro.', 20, 60, offset_y + 40, color=WHITE)
+        else:
+            for i, (path, data) in enumerate(files):
+                y = offset_y + i * 84
+                box = Rect(60, y, SCREEN_W - 120, 72)
+                pygame.draw.rect(screen, (40,40,60), box, border_radius=8)
+                draw_text(screen, data.get('nome','?'), 28, box.x + 12, box.y + 8, color=WHITE)
+                info = f"Vida: {data.get('vida',1)}  Ataque: {data.get('ataque',1)}  Defesa: {data.get('defesa',1)}"
+                draw_text(screen, info, 20, box.x + 12, box.y + 38, color=(200,200,200))
+
+        # back button
+        back_btn = Button((880, 40, 100, 40), 'Voltar', RED)
+        mx,my = pygame.mouse.get_pos()
+        back_btn.draw(screen, mouse_pos=(mx,my))
+
+        pygame.display.flip()
+
+    return None
+
+
 def main():
     pygame.init()
     # iniciar mixer para música de fundo
@@ -387,7 +504,8 @@ def main():
 
     # Buttons
     start_btn = Button((360, 250, 300, 80), 'Comecar Jogo', GREEN)
-    exit_btn = Button((360, 360, 300, 80), 'Sair', RED)
+    select_btn = Button((360, 360, 300, 80), 'Selecionar Herói', BLUE)
+    exit_btn = Button((360, 470, 300, 80), 'Sair', RED)
 
     state = 'MENU'
     heroi_obj = None
@@ -403,14 +521,32 @@ def main():
                 if state == 'MENU':
                     if start_btn.is_clicked(pos):
                         state = 'HERO'
+                    if select_btn.is_clicked(pos):
+                        state = 'SELECT'
                     if exit_btn.is_clicked(pos):
                         running = False
 
         if state == 'MENU':
-            screen.fill(WHITE)
-            draw_text(screen, 'Rural Dungeon', 56, 330, 150)
-            start_btn.draw(screen)
-            exit_btn.draw(screen)
+            # try to load menu background
+            menu_bg = None
+            try:
+                bg_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'south.png')
+                if os.path.exists(bg_path):
+                    menu_bg = pygame.image.load(bg_path).convert()
+                    menu_bg = pygame.transform.smoothscale(menu_bg, (SCREEN_W, SCREEN_H))
+            except Exception:
+                menu_bg = None
+
+            if menu_bg:
+                screen.blit(menu_bg, (0, 0))
+            else:
+                screen.fill((30, 30, 50))
+
+            draw_text(screen, 'Rural Dungeon', 56, 320, 80, color=WHITE)
+            mx, my = pygame.mouse.get_pos()
+            start_btn.draw(screen, mouse_pos=(mx, my))
+            select_btn.draw(screen, mouse_pos=(mx, my))
+            exit_btn.draw(screen, mouse_pos=(mx, my))
             pygame.display.flip()
 
         elif state == 'HERO':
@@ -421,8 +557,20 @@ def main():
                 # heroi criado e salvo
                 # salvar também no formato Personagem
                 save_personagem_file(heroi_obj)
+                # save individual hero file for selection later
+                save_hero_individual(heroi_obj)
                 Util.certo_txt(f'Herói {heroi_obj.nome} criado e salvo em save_heroi.json e save_personagem.json')
                 Util.pausa(1)
+                state = 'MENU'
+
+        elif state == 'SELECT':
+            # show selection screen
+            selection = hero_selection_screen(screen)
+            if selection is None:
+                state = 'MENU'
+            else:
+                # selection is a Heroi instance
+                start_game_with_heroi(selection)
                 state = 'MENU'
 
     pygame.quit()
