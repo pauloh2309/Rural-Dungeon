@@ -1,10 +1,11 @@
 {
-  "nome": "cayo",
+  "nome": "fepe",
   "vida": 1,
   "defesa": 1,
   "ataque": 116,
   "iniciativa": 1,
-  "dinheiro": 10.5,
   "estamina": 1,
-  "encontrou_bowser": 0
+  "dinheiro": 10.5,
+  "nivel": 1,
+  "xp": 0
 }

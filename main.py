@@ -13,6 +13,7 @@ import pygame
 from pygame import Rect
 from heroi import Heroi
 from util import Util
+import dialogo_pygame
 
 
 # Configurações
@@ -530,7 +531,7 @@ def main():
             # try to load menu background
             menu_bg = None
             try:
-                bg_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'south.png')
+                bg_path = os.path.join(os.path.dirname(__file__), 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
                 if os.path.exists(bg_path):
                     menu_bg = pygame.image.load(bg_path).convert()
                     menu_bg = pygame.transform.smoothscale(menu_bg, (SCREEN_W, SCREEN_H))
@@ -561,6 +562,12 @@ def main():
                 save_hero_individual(heroi_obj)
                 Util.certo_txt(f'Herói {heroi_obj.nome} criado e salvo em save_heroi.json e save_personagem.json')
                 Util.pausa(1)
+                # start first dialog scene (terreo)
+                try:
+                    dialogo_pygame.dialogo_terreo()
+                except Exception:
+                    Util.certo_txt('Erro ao iniciar cena de diálogo. Retornando ao menu.')
+                    Util.pausa(1)
                 state = 'MENU'
 
         elif state == 'SELECT':
@@ -570,7 +577,14 @@ def main():
                 state = 'MENU'
             else:
                 # selection is a Heroi instance
-                start_game_with_heroi(selection)
+                # save and immediately jump to dialog using a matching image if possible
+                save_personagem_file(selection)
+                save_hero_individual(selection)
+                try:
+                    dialogo_pygame.dialogo_terreo()
+                except Exception:
+                    Util.certo_txt('Erro ao iniciar cena de diálogo. Retornando ao menu.')
+                    Util.pausa(1)
                 state = 'MENU'
 
     pygame.quit()

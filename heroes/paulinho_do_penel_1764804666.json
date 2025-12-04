@@ -1,0 +1,11 @@
+{
+  "nome": "paulinho do penel",
+  "vida": 50,
+  "defesa": 50,
+  "ataque": 3,
+  "iniciativa": 15,
+  "estamina": 2,
+  "dinheiro": 10.5,
+  "nivel": 1,
+  "xp": 0
+}
