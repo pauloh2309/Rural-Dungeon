@@ -45,6 +45,7 @@ def load_frames(path, scale=3):
 
 sounds = {}
 music = None
+current_heroi = None
 
 
 class Fighter:
@@ -162,8 +163,6 @@ class Button:
         return self.rect.collidepoint(pos)
 
 
-# trufa icon and action buttons are created inside run_battle to avoid
-# performing pygame image/font operations at import time.
 
 
 Fases = [
@@ -182,7 +181,18 @@ def carregar_fase():
     nome, bg_file, hp = Fases[fase]
     background = pygame.image.load(bg_file).convert()
 
-    player = Fighter("Miguel", "FramesAnimacoes/miguel_oco", 150, 300, 120, 25)
+    try:
+        hero_hp = getattr(current_heroi, 'vidabase', getattr(current_heroi, 'vida', None))
+        hero_atk = getattr(current_heroi, 'ataquebase', getattr(current_heroi, 'ataque', None))
+        if hero_hp is None:
+            hero_hp = 120
+        if hero_atk is None:
+            hero_atk = 25
+    except Exception:
+        hero_hp = 120
+        hero_atk = 25
+
+    player = Fighter("Miguel", "FramesAnimacoes/miguel_oco", 150, 300, hero_hp, hero_atk)
     enemy = Fighter(nome, f"FramesAnimacoes/{nome}", 650, 300, hp, 18)
     player.flip_horiz = False
     enemy.flip_horiz = True
@@ -312,8 +322,10 @@ def pause_menu():
         clock.tick(60)
 
 
-def run_battle(start_fase=0):
+def run_battle(start_fase=0, heroi=None):
     global sounds, music, mixer, screen, clock, background, player, enemy, fase
+    global current_heroi
+    current_heroi = heroi
 
     pygame.init()
     try:

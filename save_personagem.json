@@ -1,11 +1,9 @@
 {
-  "nome": "Guanabara",
-  "vida": 30,
-  "defesa": 30,
-  "ataque": 30,
-  "iniciativa": 29,
+  "nome": "0",
+  "vida": 2,
+  "defesa": 1,
+  "ataque": 117,
   "dinheiro": 10.5,
-  "estamina": 1,
   "encontrou_bowser": 0,
   "interactions": []
 }

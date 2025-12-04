@@ -63,8 +63,6 @@ def save_heroi_to_file(heroi, path='save_heroi.json'):
         'vida': heroi.vida,
         'defesa': heroi.defesa,
         'ataque': heroi.ataque,
-        'iniciativa': heroi.iniciativa,
-        'estamina': heroi.estamina,
         'dinheiro': getattr(heroi, 'dinheiro', 0),
         'nivel': getattr(heroi, 'nivel', 1),
         'xp': getattr(heroi, 'xp', 0)
@@ -79,9 +77,7 @@ def save_personagem_file(heroi, path='save_personagem.json'):
         'vida': heroi.vida,
         'defesa': heroi.defesa,
         'ataque': heroi.ataque,
-        'iniciativa': heroi.iniciativa,
         'dinheiro': getattr(heroi, 'dinheiro', 10.5),
-        'estamina': heroi.estamina,
         'encontrou_bowser': getattr(heroi, 'encontrou_bowser', 0),
         'interactions': getattr(heroi, 'interactions', [])
     }
@@ -102,8 +98,6 @@ def save_hero_individual(heroi, folder='heroes'):
             'vida': heroi.vida,
             'defesa': heroi.defesa,
             'ataque': heroi.ataque,
-            'iniciativa': heroi.iniciativa,
-            'estamina': heroi.estamina,
             'dinheiro': getattr(heroi, 'dinheiro', 10.5),
             'nivel': getattr(heroi, 'nivel', 1),
             'xp': getattr(heroi, 'xp', 0)
@@ -155,9 +149,7 @@ def hero_creation_screen(screen):
     stats = {
         'ataque': 1,
         'defesa': 1,
-        'vida': 1,
-        'iniciativa': 1,
-        'estamina': 1
+        'vida': 1
     }
 
     name = ''
@@ -247,7 +239,8 @@ def hero_creation_screen(screen):
                         message = 'Insira um nome para o herói.'
                         msg_timer = 120
                     else:
-                        heroi = Heroi(nome=name.strip(), vida=stats['vida'], defesa=stats['defesa'], ataque=stats['ataque'], iniciativa=stats['iniciativa'], dinheiro_inicial=10.5, estamina=stats['estamina'])
+                        # create hero using allocated vida/ataque which influence in-game stats
+                        heroi = Heroi(nome=name.strip(), vida=stats['vida'], defesa=stats['defesa'], ataque=stats['ataque'], dinheiro_inicial=10.5)
                         save_heroi_to_file(heroi)
                         return heroi
 
@@ -519,6 +512,14 @@ def main():
                     except Exception:
                         Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
                         Util.pausa(1)
+                    try:
+                        dialogo_pygame.ru_choice_scene(selection)
+                    except Exception:
+                        pass
+                    try:
+                        dialogo_pygame.ru_choice_scene(heroi_obj)
+                    except Exception:
+                        pass
 
                     
                     try:
@@ -526,10 +527,18 @@ def main():
                     except Exception:
                         pass
 
-                    res = main_battle.run_battle(start_fase=0)
+                    res = main_battle.run_battle(start_fase=0, heroi=heroi_obj)
                     if res == 'victory':
                         try:
                             dialogo_pygame.dialogo_pos_nivel_1()
+                        except Exception:
+                            pass
+                        try:
+                            dialogo_pygame.ru_choice_scene(selection)
+                        except Exception:
+                            pass
+                        try:
+                            dialogo_pygame.ru_choice_scene(heroi_obj)
                         except Exception:
                             pass
                     elif res == 'quit':
@@ -547,10 +556,18 @@ def main():
                     except Exception:
                         ru_res = {'choice': 'next'}
 
-                    res2 = main_battle.run_battle(start_fase=1)
+                    res2 = main_battle.run_battle(start_fase=1, heroi=heroi_obj)
                     if res2 == 'victory':
                         try:
                             dialogo_pygame.dialogo_pos_nivel_2()
+                        except Exception:
+                            pass
+                        try:
+                            dialogo_pygame.ru_choice_scene(selection)
+                        except Exception:
+                            pass
+                        try:
+                            dialogo_pygame.ru_choice_scene(heroi_obj)
                         except Exception:
                             pass
                     elif res2 == 'quit':
@@ -563,10 +580,18 @@ def main():
                     except Exception:
                         pass
 
-                    res3 = main_battle.run_battle(start_fase=2)
+                    res3 = main_battle.run_battle(start_fase=2, heroi=heroi_obj)
                     if res3 == 'victory':
                         try:
                             dialogo_pygame.dialogo_pos_nivel_3()
+                        except Exception:
+                            pass
+                        try:
+                            dialogo_pygame.ru_choice_scene(selection)
+                        except Exception:
+                            pass
+                        try:
+                            dialogo_pygame.ru_choice_scene(heroi_obj)
                         except Exception:
                             pass
                     elif res3 == 'quit':
@@ -579,7 +604,7 @@ def main():
                     except Exception:
                         pass
 
-                    res4 = main_battle.run_battle(start_fase=3)
+                    res4 = main_battle.run_battle(start_fase=3, heroi=heroi_obj)
                     if res4 == 'victory':
                         try:
                             dialogo_pygame.dialogo_conclusao()
@@ -616,7 +641,7 @@ def main():
                     except Exception:
                         pass
 
-                    res = main_battle.run_battle(start_fase=0)
+                    res = main_battle.run_battle(start_fase=0, heroi=selection)
                     if res == 'victory':
                         try:
                             dialogo_pygame.dialogo_pos_nivel_1()
@@ -637,7 +662,7 @@ def main():
                     except Exception:
                         ru_res = {'choice': 'next'}
 
-                    res2 = main_battle.run_battle(start_fase=1)
+                    res2 = main_battle.run_battle(start_fase=1, heroi=selection)
                     if res2 == 'victory':
                         try:
                             dialogo_pygame.dialogo_pos_nivel_2()
@@ -653,7 +678,7 @@ def main():
                     except Exception:
                         pass
 
-                    res3 = main_battle.run_battle(start_fase=2)
+                    res3 = main_battle.run_battle(start_fase=2, heroi=selection)
                     if res3 == 'victory':
                         try:
                             dialogo_pygame.dialogo_pos_nivel_3()
@@ -669,7 +694,7 @@ def main():
                     except Exception:
                         pass
 
-                    res4 = main_battle.run_battle(start_fase=3)
+                    res4 = main_battle.run_battle(start_fase=3, heroi=selection)
                     if res4 == 'victory':
                         try:
                             dialogo_pygame.dialogo_conclusao()
