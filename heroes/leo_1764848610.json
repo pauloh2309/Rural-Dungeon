@@ -1,10 +1,11 @@
 {
-  "nome": "cleo",
-  "vida": 17,
+  "nome": "leo",
+  "vida": 16,
   "defesa": 50,
   "ataque": 50,
   "iniciativa": 2,
+  "estamina": 2,
   "dinheiro": 10.5,
-  "estamina": 1,
-  "interactions": []
+  "nivel": 1,
+  "xp": 0
 }
