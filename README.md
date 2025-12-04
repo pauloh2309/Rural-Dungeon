@@ -12,8 +12,9 @@ Lore: Um dia, um aluno que estava cansado de tanto reprovar, e com medo de ser j
 | random | utilizado em alguns trechos de código para gerar valores aleatórios |
 | colorama | para imprimir textos coloridos |
 
+# Imagens da primeira versão do jogo
 
-
+![Primeira versão](https://github.com/pauloh2309/Rural-Dungeon/blob/main/image.png)
 
 
 
