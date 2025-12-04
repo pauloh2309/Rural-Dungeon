@@ -407,18 +407,14 @@ def hero_selection_screen(screen):
 
         
         screen.fill((18,18,30))
-        draw_text(screen, 'Selecionar Heroi', 44, 40, 30, color=WHITE)
-        if not files:
-            draw_text(screen, 'Nenhum herói salvo encontrado.', 28, 60, offset_y, color=WHITE)
-            draw_text(screen, 'Crie um herói primeiro.', 20, 60, offset_y + 40, color=WHITE)
-        else:
-            for i, (path, data) in enumerate(files):
-                y = offset_y + i * 84
-                box = Rect(60, y, SCREEN_W - 120, 72)
-                pygame.draw.rect(screen, (40,40,60), box, border_radius=8)
-                draw_text(screen, data.get('nome','?'), 28, box.x + 12, box.y + 8, color=WHITE)
-                info = f"Vida: {data.get('vida',1)}  Ataque: {data.get('ataque',1)}  Defesa: {data.get('defesa',1)}"
-                draw_text(screen, info, 20, box.x + 12, box.y + 38, color=(200,200,200))
+
+        for i, (path, data) in enumerate(files):
+            y = offset_y + i * 84
+            box = Rect(60, y, SCREEN_W - 120, 72)
+            pygame.draw.rect(screen, (40,40,60), box, border_radius=8)
+            draw_text(screen, data.get('nome','?'), 28, box.x + 12, box.y + 8, color=WHITE)
+            info = f"Vida: {data.get('vida',1)}  Ataque: {data.get('ataque',1)}  Defesa: {data.get('defesa',1)}"
+            draw_text(screen, info, 20, box.x + 12, box.y + 38, color=(200,200,200))
 
         back_btn = Button((880, 40, 100, 40), 'Voltar', RED)
         mx,my = pygame.mouse.get_pos()
@@ -512,15 +508,7 @@ def main():
                     except Exception:
                         Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
                         Util.pausa(1)
-                    try:
-                        ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
-                    except Exception:
-                        ru_res = {'choice': 'next'}
-                    try:
-                        if ru_res.get('choice') == 'ru':
-                            heroi_obj.vida = getattr(heroi_obj, 'vidabase', getattr(heroi_obj, 'vida', heroi_obj.vida))
-                    except Exception:
-                        pass
+                    
 
                     
                     try:
@@ -534,15 +522,7 @@ def main():
                             dialogo_pygame.dialogo_pos_nivel_1()
                         except Exception:
                             pass
-                        try:
-                            ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
-                        except Exception:
-                            ru_res = {'choice': 'next'}
-                        try:
-                            if ru_res.get('choice') == 'ru':
-                                heroi_obj.vida = getattr(heroi_obj, 'vidabase', getattr(heroi_obj, 'vida', heroi_obj.vida))
-                        except Exception:
-                            pass
+                        
                     elif res == 'quit':
                         state = 'MENU'
                         continue
@@ -553,15 +533,7 @@ def main():
                     except Exception:
                         pass
 
-                    try:
-                        ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
-                    except Exception:
-                        ru_res = {'choice': 'next'}
-                    try:
-                        if ru_res.get('choice') == 'ru':
-                            heroi_obj.vida = getattr(heroi_obj, 'vidabase', getattr(heroi_obj, 'vida', heroi_obj.vida))
-                    except Exception:
-                        pass
+                    
 
                     res2 = main_battle.run_battle(start_fase=1, heroi=heroi_obj)
                     if res2 == 'victory':
@@ -569,15 +541,7 @@ def main():
                             dialogo_pygame.dialogo_pos_nivel_2()
                         except Exception:
                             pass
-                        try:
-                            ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
-                        except Exception:
-                            ru_res = {'choice': 'next'}
-                        try:
-                            if ru_res.get('choice') == 'ru':
-                                heroi_obj.vida = getattr(heroi_obj, 'vidabase', getattr(heroi_obj, 'vida', heroi_obj.vida))
-                        except Exception:
-                            pass
+                        
                     elif res2 == 'quit':
                         state = 'MENU'
                         continue
@@ -594,15 +558,7 @@ def main():
                             dialogo_pygame.dialogo_pos_nivel_3()
                         except Exception:
                             pass
-                        try:
-                            ru_res = dialogo_pygame.ru_choice_scene(selection)
-                        except Exception:
-                            ru_res = {'choice': 'next'}
-                        try:
-                            if ru_res.get('choice') == 'ru':
-                                selection.vida = getattr(selection, 'vidabase', getattr(selection, 'vida', selection.vida))
-                        except Exception:
-                            pass
+                        
                     elif res3 == 'quit':
                         state = 'MENU'
                         continue
@@ -666,15 +622,7 @@ def main():
                     except Exception:
                         pass
 
-                    try:
-                        ru_res = dialogo_pygame.ru_choice_scene(selection)
-                    except Exception:
-                        ru_res = {'choice': 'next'}
-                    try:
-                        if ru_res.get('choice') == 'ru':
-                            selection.vida = getattr(selection, 'vidabase', getattr(selection, 'vida', selection.vida))
-                    except Exception:
-                        pass
+                    
 
                     res2 = main_battle.run_battle(start_fase=1, heroi=selection)
                     if res2 == 'victory':

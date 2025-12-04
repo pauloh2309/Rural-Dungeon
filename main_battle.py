@@ -466,10 +466,10 @@ def run_battle(start_fase=0, heroi=None):
             turno_jogador = True
 
         if enemy.dead:
-            # persist hero current HP before exiting
+            # on victory, restore hero to full HP for next phase
             try:
                 if current_heroi is not None:
-                    current_heroi.vida = player.hp
+                    current_heroi.vida = getattr(current_heroi, 'vidabase', player.max_hp)
             except Exception:
                 pass
             mixer.music.stop()

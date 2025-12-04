@@ -971,7 +971,7 @@ def dialogo_pos_nivel_3():
 def dialogo_nivel_4():
     """Cena de diálogo: Nível 4 - Robô Python."""
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'Imagens_dialogos', '14e0a435-3968-479c-be77-c7ff2173dd36.jpg')
+    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
     npc_img = os.path.join(base, 'imagens_sem_bg', 'robo_python.png')
     return run_dialog_scene(DIALOGO_NIVEL_4_CHEFE, player_img, npc_img)
 
