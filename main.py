@@ -86,7 +86,7 @@ def save_personagem_file(heroi, path='save_personagem.json'):
 
 
 def save_hero_individual(heroi, folder='heroes'):
-    """Save each created hero into a separate file so they can be selected later."""
+
     try:
         os.makedirs(folder, exist_ok=True)
         import time
@@ -110,10 +110,7 @@ def save_hero_individual(heroi, folder='heroes'):
 
 
 def list_saved_heroes(folder='heroes'):
-    """Return list of saved hero files (path, metadata).
 
-    Each item: (path, data_dict)
-    """
     res = []
     if not os.path.exists(folder):
         return res
@@ -130,11 +127,7 @@ def list_saved_heroes(folder='heroes'):
 
 
 def start_game_with_heroi(heroi):
-    """Placeholder: integrate with actual game loop later.
 
-    For now: save selected hero into `save_heroi.json` and `save_personagem.json`
-    and print a confirmation via Util.
-    """
     save_heroi_to_file(heroi)
     save_personagem_file(heroi)
     Util.certo_txt(f'Iniciando jogo com {heroi.nome}...')
@@ -239,7 +232,7 @@ def hero_creation_screen(screen):
                         message = 'Insira um nome para o herói.'
                         msg_timer = 120
                     else:
-                        # create hero using allocated vida/ataque which influence in-game stats
+
                         heroi = Heroi(nome=name.strip(), vida=stats['vida'], defesa=stats['defesa'], ataque=stats['ataque'], dinheiro_inicial=10.5)
                         save_heroi_to_file(heroi)
                         return heroi
@@ -376,10 +369,7 @@ def hero_creation_screen(screen):
 
 
 def hero_selection_screen(screen):
-    """Display a list of saved heroes and return a Heroi instance when one is selected.
 
-    If no saved heroes exist, shows a message and returns None when the user cancels.
-    """
     clock = pygame.time.Clock()
     files = list_saved_heroes()
     idx = 0

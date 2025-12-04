@@ -4,6 +4,6 @@
   "defesa": 1,
   "ataque": 117,
   "dinheiro": 10.5,
-  "encontrou_bowser": 0,
-  "interactions": []
+  "nivel": 1,
+  "xp": 0
 }

@@ -186,7 +186,6 @@ def carregar_fase():
         hero_current = getattr(current_heroi, 'vida', None)
         hero_atk = getattr(current_heroi, 'ataquebase', getattr(current_heroi, 'ataque', None))
         if hero_max is None:
-            # fall back to provided vida if vidabase missing
             hero_max = hero_current
         if hero_max is None:
             hero_max = 120
@@ -200,7 +199,7 @@ def carregar_fase():
         hero_atk = 25
 
     player = Fighter("Miguel", "FramesAnimacoes/miguel_oco", 150, 300, hero_max, hero_atk)
-    # restore current hp from hero object so damage persists between phases
+
     try:
         player.hp = max(0, min(player.max_hp, int(hero_current)))
     except Exception:
@@ -350,7 +349,6 @@ def run_battle(start_fase=0, heroi=None):
     pygame.display.set_caption("Rural Dungeon - Batalha")
     clock = pygame.time.Clock()
 
-    # carregar sons se necessario
     if not sounds:
         try:
             sounds['dano_inimigo'] = mixer.Sound(os.path.join("audios_game", "hit_inimigo.mp3"))
@@ -361,7 +359,6 @@ def run_battle(start_fase=0, heroi=None):
             print(f"Erro ao carregar áudios: {exc}")
 
     fase = start_fase
-    # create UI buttons and load trufa icon after pygame is initialized
     trufa_icon = None
     try:
         trufa_path = os.path.join(os.path.dirname(__file__), 'trufa', 'trufa_icon.jpg')
@@ -466,7 +463,7 @@ def run_battle(start_fase=0, heroi=None):
             turno_jogador = True
 
         if enemy.dead:
-            # on victory, restore hero to full HP for next phase
+
             try:
                 if current_heroi is not None:
                     current_heroi.vida = getattr(current_heroi, 'vidabase', player.max_hp)
@@ -488,7 +485,7 @@ def run_battle(start_fase=0, heroi=None):
                 return 'quit'
             if res == 'retry':
                 fase = 0
-                # restore hero to full when retrying
+
                 try:
                     if current_heroi is not None:
                         current_heroi.vida = getattr(current_heroi, 'vidabase', getattr(current_heroi, 'vida', player.max_hp))
