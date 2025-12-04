@@ -54,8 +54,11 @@ class Button:
             color = tuple(min(255, c + 30) for c in color)
 
         pygame.draw.rect(surf, color, self.rect, border_radius=8)
-        text_color = WHITE if color != GRAY else BLACK
-        draw_text(surf, self.text, 28, self.rect.x + 10, self.rect.y + 8, color=text_color)
+        # centered text
+        font = pygame.font.SysFont(None, 28)
+        text_surf = font.render(self.text, True, WHITE if color != GRAY else BLACK)
+        text_rect = text_surf.get_rect(center=self.rect.center)
+        surf.blit(text_surf, text_rect)
 
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
@@ -90,7 +93,8 @@ def save_personagem_file(heroi, path='save_personagem.json'):
         'iniciativa': heroi.iniciativa,
         'dinheiro': getattr(heroi, 'dinheiro', 10.5),
         'estamina': heroi.estamina,
-        'encontrou_bowser': getattr(heroi, 'encontrou_bowser', 0)
+        'encontrou_bowser': getattr(heroi, 'encontrou_bowser', 0),
+        'interactions': getattr(heroi, 'interactions', [])
     }
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -503,10 +507,13 @@ def main():
     pygame.display.set_caption('Rural Dungeon - Menu')
     clock = pygame.time.Clock()
 
-    # Buttons
-    start_btn = Button((360, 250, 300, 80), 'Comecar Jogo', GREEN)
-    select_btn = Button((360, 360, 300, 80), 'Selecionar Herói', BLUE)
-    exit_btn = Button((360, 470, 300, 80), 'Sair', RED)
+    # Buttons - centered and evenly spaced
+    btn_width, btn_height = 360, 84
+    btn_x = (SCREEN_W - btn_width) // 2
+    spacing = 28
+    start_btn = Button((btn_x, 220, btn_width, btn_height), 'Comecar Jogo', GREEN)
+    select_btn = Button((btn_x, 220 + btn_height + spacing, btn_width, btn_height), 'Selecionar Herói', BLUE)
+    exit_btn = Button((btn_x, 220 + 2 * (btn_height + spacing), btn_width, btn_height), 'Sair', RED)
 
     state = 'MENU'
     heroi_obj = None
@@ -562,11 +569,28 @@ def main():
                 save_hero_individual(heroi_obj)
                 Util.certo_txt(f'Herói {heroi_obj.nome} criado e salvo em save_heroi.json e save_personagem.json')
                 Util.pausa(1)
-                # start first dialog scene (terreo)
+                # start first dialog sequence: térreo (NPC) -> introdução com Mestre Cleyton -> decisão RU/next
                 try:
-                    dialogo_pygame.dialogo_terreo()
+                    # diálogo térreo (NPC)
+                    try:
+                        dialogo_pygame.dialogo_terreo()
+                    except Exception:
+                        pass
+
+                    # introdução com Mestre Cleyton
+                    try:
+                        dialogo_pygame.dialogo_intro_cleyton()
+                    except Exception:
+                        Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton. Retornando ao menu.')
+                        Util.pausa(1)
+
+                    # após os diálogos, mostrar a interface de decisão (RU ou próximo nível)
+                    try:
+                        dialogo_pygame.ru_choice_scene(heroi_obj)
+                    except Exception:
+                        pass
                 except Exception:
-                    Util.certo_txt('Erro ao iniciar cena de diálogo. Retornando ao menu.')
+                    Util.certo_txt('Erro ao executar sequência de diálogos. Retornando ao menu.')
                     Util.pausa(1)
                 state = 'MENU'
 
@@ -581,7 +605,22 @@ def main():
                 save_personagem_file(selection)
                 save_hero_individual(selection)
                 try:
-                    dialogo_pygame.dialogo_terreo()
+                    # run NPC dialog first, then Cleyton, then RU choice
+                    try:
+                        dialogo_pygame.dialogo_terreo()
+                    except Exception:
+                        pass
+
+                    try:
+                        completed = dialogo_pygame.dialogo_intro_cleyton()
+                    except Exception:
+                        Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton. Retornando ao menu.')
+                        Util.pausa(1)
+
+                    try:
+                        dialogo_pygame.ru_choice_scene(selection)
+                    except Exception:
+                        pass
                 except Exception:
                     Util.certo_txt('Erro ao iniciar cena de diálogo. Retornando ao menu.')
                     Util.pausa(1)

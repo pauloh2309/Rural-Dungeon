@@ -1,10 +1,10 @@
 {
-  "nome": "cayo",
-  "vida": 1,
-  "defesa": 1,
-  "ataque": 116,
-  "iniciativa": 1,
-  "estamina": 1,
+  "nome": "Guanabara",
+  "vida": 30,
+  "defesa": 30,
+  "ataque": 30,
+  "iniciativa": 29,
+  "estamina": 0,
   "dinheiro": 10.5,
   "nivel": 1,
   "xp": 0

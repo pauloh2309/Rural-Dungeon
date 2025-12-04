@@ -4,8 +4,8 @@
   "defesa": 30,
   "ataque": 30,
   "iniciativa": 29,
-  "dinheiro": 10.5,
   "estamina": 1,
-  "encontrou_bowser": 0,
-  "interactions": []
+  "dinheiro": 10.5,
+  "nivel": 1,
+  "xp": 0
 }

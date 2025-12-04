@@ -1,0 +1,11 @@
+{
+  "nome": "robertinhio",
+  "vida": 40,
+  "defesa": 30,
+  "ataque": 20,
+  "iniciativa": 10,
+  "estamina": 20,
+  "dinheiro": 10.5,
+  "nivel": 1,
+  "xp": 0
+}

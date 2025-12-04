@@ -58,12 +58,12 @@ def restaurante_univ(heroi):
     
     if jogador_dinheiro < preco_ru:
         Util.erro_txt('Você não tem dinheiro suficiente, vá trabalhar, seu vagabundo!')
-        if heroi.econtrou_bowser == 0:
+        if getattr(heroi, 'encontrou_bowser', 0) == 0:
             bowser_event = Bowser(heroi)
             bowser_event.rola_roleta(bowser_event.bowser_texto[0]['aparição'])
-            heroi.econtrou_bowser = 1 
+            setattr(heroi, 'encontrou_bowser', 1)
         else:
-             Util.rpg_dialogo(texto_ru['texto_sem_evento'])
+            Util.rpg_dialogo(texto_ru['texto_sem_evento'])
         return 
     
     else:
@@ -83,7 +83,7 @@ def restaurante_univ(heroi):
             
             Util.rpg_dialogo(prato_aleatorio)
             
-            if heroi.econtrou_bowser == 1:
+            if getattr(heroi, 'encontrou_bowser', 0) == 1:
                 bowser_event = Bowser(heroi)
                 bowser_event.rola_roleta(bowser_event.bowser_texto[1]['re-aparição'])
             
