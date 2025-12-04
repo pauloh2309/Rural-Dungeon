@@ -14,7 +14,7 @@ Lore: Um dia, um aluno que estava cansado de tanto reprovar, e com medo de ser j
 
 # Imagens da primeira versão do jogo
 
-<img width="2528" height="1696" alt="Gemini_Generated_Image_oh1g0woh1g0woh1g" src="" />
+![Primeira versão](https://github.com/pauloh2309/Rural-Dungeon/blob/main/image.png])
 
 
 
