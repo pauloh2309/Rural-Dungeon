@@ -1,10 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-Script temporário para executar todos os diálogos seguidos.
-Útil para visualizar toda a progressão da história.
-"""
-
 import dialogo_pygame
 
 def main():

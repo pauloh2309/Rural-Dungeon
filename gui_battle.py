@@ -145,8 +145,8 @@ class BattleScene:
         try:
             self.sprite_player = pygame.image.load(data["sprite_hero"]).convert_alpha()
             self.sprite_enemy = pygame.image.load(data["sprite_enemy"]).convert_alpha()
-            self.sprite_player = pygame.transform.scale(self.sprite_player, (150, 200)) # Ajuste o tamanho
-            self.sprite_enemy = pygame.transform.scale(self.sprite_enemy, (200, 250))   # Ajuste o tamanho
+            self.sprite_player = pygame.transform.scale(self.sprite_player, (150, 200)) 
+            self.sprite_enemy = pygame.transform.scale(self.sprite_enemy, (200, 250))   
         except Exception as e:
             print(f"ATENÇÃO: Falha ao carregar sprites. Usando placeholder. Erro: {e}")
             self.sprite_player = pygame.Surface((150, 200), SRCALPHA)

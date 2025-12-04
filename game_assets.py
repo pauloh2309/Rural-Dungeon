@@ -1,32 +1,10 @@
-# game_assets.py
-
-# ==========================================================
-# Placeholder para Personagem. Eu vou assumir que você tem 
-# as classes Heroi e Personagem importáveis.
-# Se precisar, descomente e use esta classe mock:
-# class MockPersonagem:
-#     def __init__(self, nome, vida, ataque, defesa, estamina, carga):
-#         self.nome = nome
-#         self.vida = vida
-#         self.vidabase = vida
-#         self.ataque = ataque
-#         self.defesa = defesa
-#         self.estamina = estamina
-#         self.estaminabase = estamina
-#         self.carga_especial = carga
-#         self.carga_max_especial = 100
-#         self.trufa = [] # Simplificado para o mock
-# ==========================================================
-
-
-# Diálogos e Dados dos Chefes
 BOSSES_DATA = {
     "Administracao": {
         "nome": "Goblin da Administração",
-        "bg_image": "imagens_game/corredor_administracao.png", # PLACEHOLDER
-        "sprite_enemy": "imagens_boss/goblin_admin.png",       # PLACEHOLDER
-        "sprite_hero": "imagens_heroi/hero_parado.png",        # PLACEHOLDER
-        "stats": (150, 20, 10, 5, 0), # Vida, Ataque, Defesa, Estamina, Carga
+        "bg_image": "imagens_game/corredor_administracao.png", 
+        "sprite_enemy": "imagens_boss/goblin_admin.png",       
+        "sprite_hero": "imagens_heroi/hero_parado.png",       
+        "stats": (150, 20, 10, 5, 0), 
         "dialogue": [
             {"speaker": "Goblin da Administração", "text": "HAH! Mais um calouro perdido na burocracia eterna! Ou seria um quase-formando? Não importa! Todos se submeterão à Ordem dos Formulários Indefinidos!"},
             {"speaker": "Player", "text": "Calouro é a sua avó, seu duende da papelada! E eu não vou me submeter a nada, muito menos a você e suas pilhas de documentos sem fim! Eu só quero meu diploma!"},
@@ -40,9 +18,9 @@ BOSSES_DATA = {
     },
     "Sustentabilidade": {
         "nome": "Robô Natureza",
-        "bg_image": "imagens_game/corredor_sustentabilidade.png", # PLACEHOLDER
-        "sprite_enemy": "imagens_boss/robo_natureza.png",        # PLACEHOLDER
-        "sprite_hero": "imagens_heroi/hero_parado.png",         # PLACEHOLDER
+        "bg_image": "imagens_game/corredor_sustentabilidade.png", 
+        "sprite_enemy": "imagens_boss/robo_natureza.png",        
+        "sprite_hero": "imagens_heroi/hero_parado.png",        
         "stats": (200, 25, 15, 4, 0),
         "dialogue": [
             {"speaker": "Robô Natureza", "text": "Invasor. Seu carbono footprint está muito alto. Você é uma ameaça ao equilíbrio do ecossistema. Consumir. Produzir. Descartar. O ciclo deve ser quebrado."},
@@ -56,7 +34,7 @@ BOSSES_DATA = {
             {"speaker": "SYSTEM", "text": "Início da batalha contra o Chefe da Sustentabilidade!"}
         ],
     },
-    # ... (Os outros chefes seguem o mesmo padrão)
+
     "Matematica": {
         "nome": "Mago Místico",
         "bg_image": "imagens_game/corredor_matematica.png",

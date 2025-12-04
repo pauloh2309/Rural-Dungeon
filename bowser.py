@@ -155,7 +155,6 @@ Bowser:
         escolha_roleta = random.choice(opcoes_roleta)
         outcome_text = ''
 
-        # Apply effects to hero
         if escolha_roleta['tipo'] == 'jackpot':
             if escolha_roleta['nome'] == 'Mega-Sena (Ganho de R$ 20.00)':
                 self.heroi.dinheiro = getattr(self.heroi, 'dinheiro', 0) + 20.00
