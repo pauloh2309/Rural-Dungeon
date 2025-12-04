@@ -192,28 +192,52 @@ class CaixaDialogo:
             except Exception:
                 pass
         
+        loaded = False
         if npc_img_path and os.path.exists(npc_img_path):
             try:
                 self.npc_img = pygame.image.load(npc_img_path).convert_alpha()
                 self.npc_img = pygame.transform.smoothscale(self.npc_img, (300, 400))
+                loaded = True
             except Exception:
-                pass
-        else:
-            # If requested NPC image is missing and filename hints Bowser, create a simple placeholder surface
+                loaded = False
+
+        if not loaded and npc_img_path:
+            # Try common alternative folders for the same filename
             try:
-                if npc_img_path and 'bowser_referencia' in os.path.basename(npc_img_path).lower():
-                    surf = pygame.Surface((300, 400), pygame.SRCALPHA)
-                    surf.fill((150, 30, 30, 255))
-                    # render 'Bowser' label
-                    try:
-                        label = FONTE_NOME.render('Bowser', True, (255, 255, 255))
-                        label_rect = label.get_rect(center=(150, 200))
-                        surf.blit(label, label_rect)
-                    except Exception:
-                        pass
-                    self.npc_img = surf
+                base_dir = os.path.dirname(__file__)
+                name = os.path.basename(npc_img_path)
+                alt_paths = [
+                    os.path.join(base_dir, 'imagens_game', name),
+                    os.path.join(base_dir, 'Imagens_dialogos', name),
+                    os.path.join(base_dir, 'imagens_dialogo', name),
+                ]
+                for p in alt_paths:
+                    if os.path.exists(p):
+                        try:
+                            self.npc_img = pygame.image.load(p).convert_alpha()
+                            self.npc_img = pygame.transform.smoothscale(self.npc_img, (300, 400))
+                            loaded = True
+                            break
+                        except Exception:
+                            continue
             except Exception:
                 pass
+
+            # If still not loaded and filename hints Bowser, create a simple placeholder surface
+            if not loaded:
+                try:
+                    if npc_img_path and 'bowser_referencia' in os.path.basename(npc_img_path).lower():
+                        surf = pygame.Surface((300, 400), pygame.SRCALPHA)
+                        surf.fill((150, 30, 30, 255))
+                        try:
+                            label = FONTE_NOME.render('Bowser', True, (255, 255, 255))
+                            label_rect = label.get_rect(center=(150, 200))
+                            surf.blit(label, label_rect)
+                        except Exception:
+                            pass
+                        self.npc_img = surf
+                except Exception:
+                    pass
         
         if bg_img_path and os.path.exists(bg_img_path):
             try:
@@ -486,7 +510,7 @@ def dialogo_terreo():
     """Cena de diálogo no térreo com NPC."""
     base = os.path.dirname(__file__)
     player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
-    npc_img = os.path.join(base, 'imagens_game', 'npc_sembg.png')
+    npc_img = os.path.join(base, 'Imagens_dialogos', 'npc_sembg.png')
     bg_img = os.path.join(base, 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
     return run_dialog_scene(DIALOGO_TERREO_INICIO, player_img, npc_img, bg_img)
 
@@ -900,7 +924,7 @@ def dialogo_nivel_1():
     """Cena de diálogo: Nível 1 - Goblin da Administração."""
     base = os.path.dirname(__file__)
     player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
-    npc_img = os.path.join(base, 'imagens_game', 'npc_sembg.png')
+    npc_img = os.path.join(base, 'imagens_sem_bg', 'goblin_adm.png')
     return run_dialog_scene(DIALOGO_NIVEL_1_CHEFE, player_img, npc_img)
 
 
@@ -916,7 +940,7 @@ def dialogo_nivel_2():
     """Cena de diálogo: Nível 2 - Robô Natureza."""
     base = os.path.dirname(__file__)
     player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
-    npc_img = os.path.join(base, 'imagens_game', 'npc_sembg.png')
+    npc_img = os.path.join(base, 'imagens_sem_bg', 'robo_sustentavel.png')
     return run_dialog_scene(DIALOGO_NIVEL_2_CHEFE, player_img, npc_img)
 
 
@@ -932,7 +956,7 @@ def dialogo_nivel_3():
     """Cena de diálogo: Nível 3 - Mago Místico."""
     base = os.path.dirname(__file__)
     player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
-    npc_img = os.path.join(base, 'imagens_game', 'npc_sembg.png')
+    npc_img = os.path.join(base, 'imagens_sem_bg', 'mago_matematica.png')
     return run_dialog_scene(DIALOGO_NIVEL_3_CHEFE, player_img, npc_img)
 
 
@@ -948,7 +972,7 @@ def dialogo_nivel_4():
     """Cena de diálogo: Nível 4 - Robô Python."""
     base = os.path.dirname(__file__)
     player_img = os.path.join(base, 'Imagens_dialogos', '14e0a435-3968-479c-be77-c7ff2173dd36.jpg')
-    npc_img = os.path.join(base, 'imagens_game', 'npc_sembg.png')
+    npc_img = os.path.join(base, 'imagens_sem_bg', 'robo_python.png')
     return run_dialog_scene(DIALOGO_NIVEL_4_CHEFE, player_img, npc_img)
 
 

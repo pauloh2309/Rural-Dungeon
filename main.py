@@ -520,7 +520,7 @@ def main():
                         Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
                         Util.pausa(1)
 
-                    # Nível 1
+                    
                     try:
                         dialogo_pygame.dialogo_nivel_1()
                     except Exception:
@@ -536,7 +536,7 @@ def main():
                         state = 'MENU'
                         continue
 
-                    # Nível 2 - diálogo e escolha RU
+                    
                     try:
                         dialogo_pygame.dialogo_nivel_2()
                     except Exception:
@@ -557,7 +557,7 @@ def main():
                         state = 'MENU'
                         continue
 
-                    # Nível 3
+                    
                     try:
                         dialogo_pygame.dialogo_nivel_3()
                     except Exception:
@@ -573,7 +573,7 @@ def main():
                         state = 'MENU'
                         continue
 
-                    # Nível 4 - final
+                    
                     try:
                         dialogo_pygame.dialogo_nivel_4()
                     except Exception:
@@ -610,7 +610,7 @@ def main():
                         Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
                         Util.pausa(1)
 
-                    # Nível 1
+                    
                     try:
                         dialogo_pygame.dialogo_nivel_1()
                     except Exception:
@@ -626,7 +626,7 @@ def main():
                         state = 'MENU'
                         continue
 
-                    # Nível 2
+                    
                     try:
                         dialogo_pygame.dialogo_nivel_2()
                     except Exception:
@@ -647,7 +647,7 @@ def main():
                         state = 'MENU'
                         continue
 
-                    # Nível 3
+                    
                     try:
                         dialogo_pygame.dialogo_nivel_3()
                     except Exception:
@@ -663,7 +663,7 @@ def main():
                         state = 'MENU'
                         continue
 
-                    # Nível 4
+                    
                     try:
                         dialogo_pygame.dialogo_nivel_4()
                     except Exception:
