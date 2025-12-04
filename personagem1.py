@@ -18,6 +18,9 @@ class Personagem:
         self.estaminabase = estamina
         self.encontrou_bowser = encontrou_bowser
 
+        # registro de interações (RU, Bowser, etc.)
+        self.interactions = []
+
         self.carga_especial = 0
         self.carga_max_especial = 100
         

@@ -6,12 +6,13 @@ init(autoreset=True)
 
 class Heroi(Personagem):
 
-    def __init__(self, nome='', vida=1, defesa=1, ataque=1, iniciativa=0, dinheiro_inicial=10.5, estamina=1, econtrou_bowser=0, xp = 0, xp_max = 100, nivel = 1):
-        super().__init__(nome, vida, defesa, ataque, iniciativa, dinheiro_inicial, estamina, econtrou_bowser)
+    def __init__(self, nome='', vida=1, defesa=1, ataque=1, iniciativa=0, dinheiro_inicial=10.5, estamina=1, encontrou_bowser=0, xp = 0, xp_max = 100, nivel = 1):
+        super().__init__(nome, vida, defesa, ataque, iniciativa, dinheiro_inicial, estamina, encontrou_bowser)
         self.xp = xp
         self.xp_max = xp_max
         self.nivel = nivel
-        self.nivel_atual = 
+        # nível atual inicializado com o nível informado
+        self.nivel_atual = nivel
 
 
     def personalizacao(self):
@@ -68,6 +69,10 @@ class Heroi(Personagem):
             self.nivel += 1
             self.xp -= self.xp_max
             self.xp_max = int(self.xp_max * 1.25)
-
     def pontos_nivel(self):
+        """Retorna a quantidade de pontos de status concedidos ao subir de nível.
+
+        Implementação mínima: 5 pontos por nível acima do 1.
+        """
+        return max(0, (self.nivel - 1) * 5)
 

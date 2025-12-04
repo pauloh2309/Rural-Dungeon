@@ -133,3 +133,66 @@ Bowser:
             
             Util.continuar()
             return
+
+    def rola_roleta_gui(self, texto=None):
+        """Versão da roleta adaptada para uso em GUI/dialogs.
+
+        Não usa Util para imprimir nem pausar; aplica os efeitos ao `heroi`
+        e retorna um dicionário com informações para a interface.
+        """
+        import random
+
+        opcoes_roleta = [
+            {'nome': 'Mega-Sena (Ganho de R$ 20.00)', 'tipo': 'jackpot', 'efeito': '+20 Dinheiro', 'texto_bowser': 'Ganho inesperado!'},
+            {'nome': 'Aula de Álgebra (Perda de R$ 10.00)', 'tipo': 'falência', 'efeito': '-10 Dinheiro', 'texto_bowser': 'Perdeu, Playboy!'},
+            {'nome': 'Aula de Cálculo (Perda de R$ 5.00)', 'tipo': 'falência', 'efeito': '-5 Dinheiro', 'texto_bowser': 'Você tem sorte que não foi pior!'},
+            {'nome': 'Recarga de Vitalidade (Aumento de 5 Vida Base)', 'tipo': 'benção', 'efeito': '+5 Vidabase', 'texto_bowser': 'Uma bênção de vitalidade!'},
+            {'nome': 'Recarga de Estamina (Aumento de 5 Estamina Base)', 'tipo': 'benção', 'efeito': '+5 Estaminabase', 'texto_bowser': 'Uma bênção de estamina!'},
+            {'nome': 'Prova Surpresa (Perda de 50 Vida)', 'tipo': 'maldição', 'efeito': '-50 Vida', 'texto_bowser': 'Isso que dá não estudar!'},
+            {'nome': 'Trabalho em Grupo (Perda de 50 Estamina)', 'tipo': 'maldição', 'efeito': '-50 Estamina', 'texto_bowser': 'Trabalho em grupo é sempre um terror!'}
+        ]
+
+        escolha_roleta = random.choice(opcoes_roleta)
+        outcome_text = ''
+
+        # Apply effects to hero
+        if escolha_roleta['tipo'] == 'jackpot':
+            if escolha_roleta['nome'] == 'Mega-Sena (Ganho de R$ 20.00)':
+                self.heroi.dinheiro = getattr(self.heroi, 'dinheiro', 0) + 20.00
+                outcome_text = f'{self.heroi.nome} ganhou R$ 20.00! Dinheiro atual: R$ {self.heroi.dinheiro:.2f}.'
+
+        elif escolha_roleta['tipo'] == 'falência':
+            if escolha_roleta['nome'] == 'Aula de Álgebra (Perda de R$ 10.00)':
+                perda = min(getattr(self.heroi, 'dinheiro', 0), 10.00)
+                self.heroi.dinheiro = getattr(self.heroi, 'dinheiro', 0) - perda
+                outcome_text = f'{self.heroi.nome} perdeu R$ {perda:.2f}! Dinheiro atual: R$ {self.heroi.dinheiro:.2f}.'
+            elif escolha_roleta['nome'] == 'Aula de Cálculo (Perda de R$ 5.00)':
+                perda = min(getattr(self.heroi, 'dinheiro', 0), 5.00)
+                self.heroi.dinheiro = getattr(self.heroi, 'dinheiro', 0) - perda
+                outcome_text = f'{self.heroi.nome} perdeu R$ {perda:.2f}! Dinheiro atual: R$ {self.heroi.dinheiro:.2f}.'
+
+        elif escolha_roleta['tipo'] == 'benção':
+            if escolha_roleta['nome'] == 'Recarga de Vitalidade (Aumento de 5 Vida Base)':
+                self.heroi.vidabase = getattr(self.heroi, 'vidabase', getattr(self.heroi, 'vida', 0)) + 5
+                self.heroi.vida = getattr(self.heroi, 'vida', 0) + 5
+                outcome_text = f'{self.heroi.nome} recebeu uma bênção! Vida atual: {self.heroi.vida}/{self.heroi.vidabase}.'
+            elif escolha_roleta['nome'] == 'Recarga de Estamina (Aumento de 5 Estamina Base)':
+                self.heroi.estaminabase = getattr(self.heroi, 'estaminabase', getattr(self.heroi, 'estamina', 0)) + 5
+                self.heroi.estamina = getattr(self.heroi, 'estamina', 0) + 5
+                outcome_text = f'{self.heroi.nome} recebeu uma bênção! Estamina atual: {self.heroi.estamina}/{self.heroi.estaminabase}.'
+
+        else:
+            if escolha_roleta['nome'] == 'Prova Surpresa (Perda de 50 Vida)':
+                perda = 50
+                self.heroi.vida = max(0, getattr(self.heroi, 'vida', 0) - perda)
+                outcome_text = f'{self.heroi.nome} recebeu uma maldição e perdeu {perda} de Vida. Vida atual: {self.heroi.vida}/{getattr(self.heroi, "vidabase", self.heroi.vida)}.'
+            elif escolha_roleta['nome'] == 'Trabalho em Grupo (Perda de 50 Estamina)':
+                perda = 50
+                self.heroi.estamina = max(0, getattr(self.heroi, 'estamina', 0) - perda)
+                outcome_text = f'{self.heroi.nome} recebeu uma maldição e perdeu {perda} de Estamina. Estamina atual: {self.heroi.estamina}/{getattr(self.heroi, "estaminabase", self.heroi.estamina)}.'
+
+        return {
+            'escolha': escolha_roleta,
+            'outcome_text': outcome_text,
+            'texto_bowser': escolha_roleta.get('texto_bowser', '')
+        }

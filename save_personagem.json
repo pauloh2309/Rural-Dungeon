@@ -1,0 +1,11 @@
+{
+  "nome": "paulo",
+  "vida": 11,
+  "defesa": 65,
+  "ataque": 17,
+  "iniciativa": 26,
+  "dinheiro": 10.5,
+  "estamina": 1,
+  "encontrou_bowser": 0,
+  "interactions": []
+}
