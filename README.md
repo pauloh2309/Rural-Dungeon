@@ -14,7 +14,7 @@ Lore: Um dia, um aluno que estava cansado de tanto reprovar, e com medo de ser j
 
 # Imagens da primeira versão do jogo
 
-![Primeira versão](https://github.com/pauloh2309/Rural-Dungeon/blob/main/image.png])
+![Primeira versão](https://github.com/pauloh2309/Rural-Dungeon/blob/main/image.png)
 
 
 
