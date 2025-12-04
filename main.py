@@ -513,11 +513,12 @@ def main():
                         Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
                         Util.pausa(1)
                     try:
-                        dialogo_pygame.ru_choice_scene(selection)
+                        ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
                     except Exception:
-                        pass
+                        ru_res = {'choice': 'next'}
                     try:
-                        dialogo_pygame.ru_choice_scene(heroi_obj)
+                        if ru_res.get('choice') == 'ru':
+                            heroi_obj.vida = getattr(heroi_obj, 'vidabase', getattr(heroi_obj, 'vida', heroi_obj.vida))
                     except Exception:
                         pass
 
@@ -534,11 +535,12 @@ def main():
                         except Exception:
                             pass
                         try:
-                            dialogo_pygame.ru_choice_scene(selection)
+                            ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
                         except Exception:
-                            pass
+                            ru_res = {'choice': 'next'}
                         try:
-                            dialogo_pygame.ru_choice_scene(heroi_obj)
+                            if ru_res.get('choice') == 'ru':
+                                heroi_obj.vida = getattr(heroi_obj, 'vidabase', getattr(heroi_obj, 'vida', heroi_obj.vida))
                         except Exception:
                             pass
                     elif res == 'quit':
@@ -555,6 +557,11 @@ def main():
                         ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
                     except Exception:
                         ru_res = {'choice': 'next'}
+                    try:
+                        if ru_res.get('choice') == 'ru':
+                            heroi_obj.vida = getattr(heroi_obj, 'vidabase', getattr(heroi_obj, 'vida', heroi_obj.vida))
+                    except Exception:
+                        pass
 
                     res2 = main_battle.run_battle(start_fase=1, heroi=heroi_obj)
                     if res2 == 'victory':
@@ -563,11 +570,12 @@ def main():
                         except Exception:
                             pass
                         try:
-                            dialogo_pygame.ru_choice_scene(selection)
+                            ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
                         except Exception:
-                            pass
+                            ru_res = {'choice': 'next'}
                         try:
-                            dialogo_pygame.ru_choice_scene(heroi_obj)
+                            if ru_res.get('choice') == 'ru':
+                                heroi_obj.vida = getattr(heroi_obj, 'vidabase', getattr(heroi_obj, 'vida', heroi_obj.vida))
                         except Exception:
                             pass
                     elif res2 == 'quit':
@@ -587,11 +595,12 @@ def main():
                         except Exception:
                             pass
                         try:
-                            dialogo_pygame.ru_choice_scene(selection)
+                            ru_res = dialogo_pygame.ru_choice_scene(selection)
                         except Exception:
-                            pass
+                            ru_res = {'choice': 'next'}
                         try:
-                            dialogo_pygame.ru_choice_scene(heroi_obj)
+                            if ru_res.get('choice') == 'ru':
+                                selection.vida = getattr(selection, 'vidabase', getattr(selection, 'vida', selection.vida))
                         except Exception:
                             pass
                     elif res3 == 'quit':
@@ -661,6 +670,11 @@ def main():
                         ru_res = dialogo_pygame.ru_choice_scene(selection)
                     except Exception:
                         ru_res = {'choice': 'next'}
+                    try:
+                        if ru_res.get('choice') == 'ru':
+                            selection.vida = getattr(selection, 'vidabase', getattr(selection, 'vida', selection.vida))
+                    except Exception:
+                        pass
 
                     res2 = main_battle.run_battle(start_fase=1, heroi=selection)
                     if res2 == 'victory':

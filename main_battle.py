@@ -182,17 +182,29 @@ def carregar_fase():
     background = pygame.image.load(bg_file).convert()
 
     try:
-        hero_hp = getattr(current_heroi, 'vidabase', getattr(current_heroi, 'vida', None))
+        hero_max = getattr(current_heroi, 'vidabase', None)
+        hero_current = getattr(current_heroi, 'vida', None)
         hero_atk = getattr(current_heroi, 'ataquebase', getattr(current_heroi, 'ataque', None))
-        if hero_hp is None:
-            hero_hp = 120
+        if hero_max is None:
+            # fall back to provided vida if vidabase missing
+            hero_max = hero_current
+        if hero_max is None:
+            hero_max = 120
         if hero_atk is None:
             hero_atk = 25
+        if hero_current is None:
+            hero_current = hero_max
     except Exception:
-        hero_hp = 120
+        hero_max = 120
+        hero_current = 120
         hero_atk = 25
 
-    player = Fighter("Miguel", "FramesAnimacoes/miguel_oco", 150, 300, hero_hp, hero_atk)
+    player = Fighter("Miguel", "FramesAnimacoes/miguel_oco", 150, 300, hero_max, hero_atk)
+    # restore current hp from hero object so damage persists between phases
+    try:
+        player.hp = max(0, min(player.max_hp, int(hero_current)))
+    except Exception:
+        player.hp = player.max_hp
     enemy = Fighter(nome, f"FramesAnimacoes/{nome}", 650, 300, hp, 18)
     player.flip_horiz = False
     enemy.flip_horiz = True
@@ -454,6 +466,12 @@ def run_battle(start_fase=0, heroi=None):
             turno_jogador = True
 
         if enemy.dead:
+            # persist hero current HP before exiting
+            try:
+                if current_heroi is not None:
+                    current_heroi.vida = player.hp
+            except Exception:
+                pass
             mixer.music.stop()
             fase += 1
             return 'victory'
@@ -462,9 +480,20 @@ def run_battle(start_fase=0, heroi=None):
             mixer.music.stop()
             res = game_over_screen()
             if res == 'quit':
+                try:
+                    if current_heroi is not None:
+                        current_heroi.vida = player.hp
+                except Exception:
+                    pass
                 return 'quit'
             if res == 'retry':
                 fase = 0
+                # restore hero to full when retrying
+                try:
+                    if current_heroi is not None:
+                        current_heroi.vida = getattr(current_heroi, 'vidabase', getattr(current_heroi, 'vida', player.max_hp))
+                except Exception:
+                    pass
                 carregar_fase()
                 turno_jogador = True
                 esperando = False
