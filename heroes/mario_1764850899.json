@@ -1,8 +1,8 @@
 {
-  "nome": "felie",
-  "vida": 16,
-  "defesa": 1,
-  "ataque": 100,
+  "nome": "mario",
+  "vida": 7,
+  "defesa": 60,
+  "ataque": 50,
   "iniciativa": 2,
   "estamina": 1,
   "dinheiro": 10.5,

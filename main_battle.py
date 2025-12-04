@@ -2,13 +2,8 @@ import pygame
 import os
 import sys
 
-pygame.init()
-mixer = pygame.mixer
-mixer.init()
 WIDTH, HEIGHT = 960, 640
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Rural Dungeon")
-clock = pygame.time.Clock()
+
 
 
 def load_frames(path, scale=3):
@@ -50,13 +45,6 @@ def load_frames(path, scale=3):
 
 sounds = {}
 music = None
-try:
-    sounds['dano_inimigo'] = mixer.Sound(os.path.join("audios_game", "hit_inimigo.mp3"))
-    sounds['hit_jogador'] = mixer.Sound(os.path.join("audios_game", "hit_jogador.mp3"))
-    sounds['cura_trufa'] = mixer.Sound(os.path.join("audios_game", "cura_trufa.mp3"))
-    music = os.path.join("audios_game", "tema_batalha.mp3")
-except Exception as exc:
-    print(f"Erro ao carregar áudios: {exc}")
 
 
 class Fighter:
@@ -174,19 +162,8 @@ class Button:
         return self.rect.collidepoint(pos)
 
 
-trufa_icon = None
-try:
-    trufa_icon = pygame.image.load(os.path.join("trufa", "trufa_icon.jpg")).convert_alpha()
-    trufa_icon = pygame.transform.scale(trufa_icon, (32, 32))
-except Exception as exc:
-    print(f"Não foi possível carregar ícone da trufa: {exc}")
-
-btn_attack = Button("ATACAR", 50, 540)
-btn_special = Button("ESPECIAL", 350, 540)
-btn_trufa = Button("TRUFA", 650, 540)
-
-if trufa_icon:
-    btn_trufa.icon = trufa_icon
+# trufa icon and action buttons are created inside run_battle to avoid
+# performing pygame image/font operations at import time.
 
 
 Fases = [
@@ -226,8 +203,6 @@ def carregar_fase():
             print(f"Erro ao tocar música tema: {exc}")
 
 
-carregar_fase()
-
 
 def game_over_screen():
     title_font = pygame.font.SysFont("Arial", 64)
@@ -241,18 +216,13 @@ def game_over_screen():
     while True:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                return 'quit'
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 pos = e.pos
                 if btn_retry.clicked(pos):
-                    global fase
-                    fase = 0
-                    carregar_fase()
-                    return
+                    return 'retry'
                 if btn_quit.clicked(pos):
-                    pygame.quit()
-                    sys.exit()
+                    return 'quit'
 
         try:
             screen.blit(background, (0, 0))
@@ -290,11 +260,10 @@ def pause_menu():
     while True:
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            
+                return 'quit'
+
             if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-                return
+                return 'resume'
             
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 pos = e.pos
@@ -305,11 +274,10 @@ def pause_menu():
                     mixer.music.set_volume(max(0.0, min(1.0, new_vol)))
                 
                 if btn_resume.clicked(pos):
-                    return
-                
+                    return 'resume'
+
                 if btn_quit_pause.clicked(pos):
-                    pygame.quit()
-                    sys.exit()
+                    return 'quit'
             
             if e.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
                 pos = e.pos
@@ -344,102 +312,152 @@ def pause_menu():
         clock.tick(60)
 
 
-turno_jogador = True
-esperando = False
-delay = 0
+def run_battle(start_fase=0):
+    global sounds, music, mixer, screen, clock, background, player, enemy, fase
 
-font = pygame.font.SysFont("Arial", 24)
-running = True
-while running:
-    screen.blit(background, (0, 0))
+    pygame.init()
+    try:
+        pygame.mixer.init()
+    except Exception:
+        pass
 
-    pygame.draw.rect(screen, (0, 0, 0), (0, 500, WIDTH, 140))
+    mixer = pygame.mixer
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Rural Dungeon - Batalha")
+    clock = pygame.time.Clock()
 
-    pygame.draw.rect(screen, (180, 0, 0), (50, 520, 300, 20))
-    pygame.draw.rect(screen, (0, 200, 0), (50, 520, 300 * (player.hp / player.max_hp), 20))
-    screen.blit(font.render("HP Jogador", True, (255, 255, 255)), (50, 495))
+    # carregar sons se necessario
+    if not sounds:
+        try:
+            sounds['dano_inimigo'] = mixer.Sound(os.path.join("audios_game", "hit_inimigo.mp3"))
+            sounds['hit_jogador'] = mixer.Sound(os.path.join("audios_game", "hit_jogador.mp3"))
+            sounds['cura_trufa'] = mixer.Sound(os.path.join("audios_game", "cura_trufa.mp3"))
+            music = os.path.join("audios_game", "tema_batalha.mp3")
+        except Exception as exc:
+            print(f"Erro ao carregar áudios: {exc}")
 
-    pygame.draw.rect(screen, (180, 0, 0), (600, 520, 300, 20))
-    pygame.draw.rect(screen, (0, 200, 0), (600, 520, 300 * (enemy.hp / enemy.max_hp), 20))
-    screen.blit(font.render("HP Inimigo", True, (255, 255, 255)), (600, 495))
+    fase = start_fase
+    # create UI buttons and load trufa icon after pygame is initialized
+    trufa_icon = None
+    try:
+        trufa_path = os.path.join(os.path.dirname(__file__), 'trufa', 'trufa_icon.jpg')
+        if os.path.exists(trufa_path):
+            trufa_icon = pygame.image.load(trufa_path).convert_alpha()
+            trufa_icon = pygame.transform.scale(trufa_icon, (32, 32))
+    except Exception:
+        trufa_icon = None
 
-    pygame.draw.rect(screen, (80, 80, 80), (350, 505, 230, 8))
-    pygame.draw.rect(screen, (0, 120, 255), (350, 505, 230 * (player.special_charge / 100), 8))
-    screen.blit(font.render("Especial", True, (255, 255, 255)), (350, 480))
+    btn_attack = Button("ATACAR", 50, 540)
+    btn_special = Button("ESPECIAL", 350, 540)
+    btn_trufa = Button("TRUFA", 650, 540)
+    if trufa_icon:
+        btn_trufa.icon = trufa_icon
 
-    trufas_rest = max(0, 5 - getattr(player, 'trufas_used', 0))
-    screen.blit(font.render(f"Trufas: {trufas_rest}/5", True, (255, 255, 255)), (650, 480))
+    carregar_fase()
 
-    btn_attack.draw(screen)
-    btn_special.draw(screen)
-    btn_trufa.draw(screen)
+    turno_jogador = True
+    esperando = False
+    delay = 0
 
-    player.update()
-    enemy.update()
-    player.draw(screen)
-    enemy.draw(screen)
+    font = pygame.font.SysFont("Arial", 24)
 
-    for e in pygame.event.get():
-        if e.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+    while True:
+        try:
+            screen.blit(background, (0, 0))
+        except Exception:
+            screen.fill((0, 0, 0))
 
-        if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-            pause_menu()
+        pygame.draw.rect(screen, (0, 0, 0), (0, 500, WIDTH, 140))
 
-        if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and turno_jogador:
-            pos = e.pos
+        pygame.draw.rect(screen, (180, 0, 0), (50, 520, 300, 20))
+        pygame.draw.rect(screen, (0, 200, 0), (50, 520, 300 * (player.hp / player.max_hp), 20))
+        screen.blit(font.render("HP Jogador", True, (255, 255, 255)), (50, 495))
 
-            if btn_attack.clicked(pos):
-                player.attack(enemy)
-                turno_jogador = False
-                esperando = True
-                delay = pygame.time.get_ticks()
+        pygame.draw.rect(screen, (180, 0, 0), (600, 520, 300, 20))
+        pygame.draw.rect(screen, (0, 200, 0), (600, 520, 300 * (enemy.hp / enemy.max_hp), 20))
+        screen.blit(font.render("HP Inimigo", True, (255, 255, 255)), (600, 495))
 
-            if btn_trufa.clicked(pos):
-                if getattr(player, 'trufas_used', 0) < 5:
-                    player.heal(30)
-                    player.special_charge = min(100, player.special_charge + 20)
-                    player.trufas_used += 1
+        pygame.draw.rect(screen, (80, 80, 80), (350, 505, 230, 8))
+        pygame.draw.rect(screen, (0, 120, 255), (350, 505, 230 * (player.special_charge / 100), 8))
+        screen.blit(font.render("Especial", True, (255, 255, 255)), (350, 480))
+
+        trufas_rest = max(0, 5 - getattr(player, 'trufas_used', 0))
+        screen.blit(font.render(f"Trufas: {trufas_rest}/5", True, (255, 255, 255)), (650, 480))
+
+        btn_attack.draw(screen)
+        btn_special.draw(screen)
+        btn_trufa.draw(screen)
+
+        player.update()
+        enemy.update()
+        player.draw(screen)
+        enemy.draw(screen)
+
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                return 'quit'
+
+            if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+                res = pause_menu()
+                if res == 'quit':
+                    return 'quit'
+
+            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and turno_jogador:
+                pos = e.pos
+
+                if btn_attack.clicked(pos):
+                    player.attack(enemy)
                     turno_jogador = False
                     esperando = True
                     delay = pygame.time.get_ticks()
-                    if 'cura_trufa' in sounds:
-                        try:
-                            sounds['cura_trufa'].play()
-                        except Exception as exc:
-                            print(f"Erro ao tocar cura_trufa: {exc}")
-                else:
-                    print("Sem trufas restantes nesta luta.")
 
-            if btn_special.clicked(pos) and player.special_charge == 100:
-                player.attack(enemy, special=True)
-                turno_jogador = False
-                esperando = True
-                delay = pygame.time.get_ticks()
+                if btn_trufa.clicked(pos):
+                    if getattr(player, 'trufas_used', 0) < 5:
+                        player.heal(30)
+                        player.special_charge = min(100, player.special_charge + 20)
+                        player.trufas_used += 1
+                        turno_jogador = False
+                        esperando = True
+                        delay = pygame.time.get_ticks()
+                        if 'cura_trufa' in sounds:
+                            try:
+                                sounds['cura_trufa'].play()
+                            except Exception as exc:
+                                print(f"Erro ao tocar cura_trufa: {exc}")
+                    else:
+                        print("Sem trufas restantes nesta luta.")
 
-    if esperando and pygame.time.get_ticks() - delay > 700:
-        esperando = False
+                if btn_special.clicked(pos) and player.special_charge == 100:
+                    player.attack(enemy, special=True)
+                    turno_jogador = False
+                    esperando = True
+                    delay = pygame.time.get_ticks()
 
-        if not enemy.dead and not turno_jogador:
-            enemy.attack(player)
+        if esperando and pygame.time.get_ticks() - delay > 700:
+            esperando = False
 
-        turno_jogador = True
+            if not enemy.dead and not turno_jogador:
+                enemy.attack(player)
 
-    if enemy.dead:
-        fase += 1
-        mixer.music.stop()
-        if fase >= len(Fases):
-            print("Você venceu o jogo!")
-            pygame.quit()
-            sys.exit()
-        carregar_fase()
+            turno_jogador = True
 
-    if player.dead:
-        mixer.music.stop()  
-        game_over_screen()
-        turno_jogador = True
-        esperando = False
+        if enemy.dead:
+            mixer.music.stop()
+            fase += 1
+            return 'victory'
 
-    pygame.display.update()
-    clock.tick(60)
+        if player.dead:
+            mixer.music.stop()
+            res = game_over_screen()
+            if res == 'quit':
+                return 'quit'
+            if res == 'retry':
+                fase = 0
+                carregar_fase()
+                turno_jogador = True
+                esperando = False
+                delay = 0
+                continue
+
+        pygame.display.update()
+        clock.tick(60)

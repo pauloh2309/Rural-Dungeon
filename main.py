@@ -6,6 +6,7 @@ from pygame import Rect
 from heroi import Heroi
 from util import Util
 import dialogo_pygame
+import main_battle
 
 
 SCREEN_W = 1024
@@ -516,15 +517,77 @@ def main():
                     try:
                         dialogo_pygame.dialogo_intro_cleyton()
                     except Exception:
-                        Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton. Retornando ao menu.')
+                        Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
                         Util.pausa(1)
 
+                    # Nível 1
                     try:
-                        dialogo_pygame.ru_choice_scene(heroi_obj)
+                        dialogo_pygame.dialogo_nivel_1()
                     except Exception:
                         pass
+
+                    res = main_battle.run_battle(start_fase=0)
+                    if res == 'victory':
+                        try:
+                            dialogo_pygame.dialogo_pos_nivel_1()
+                        except Exception:
+                            pass
+                    elif res == 'quit':
+                        state = 'MENU'
+                        continue
+
+                    # Nível 2 - diálogo e escolha RU
+                    try:
+                        dialogo_pygame.dialogo_nivel_2()
+                    except Exception:
+                        pass
+
+                    try:
+                        ru_res = dialogo_pygame.ru_choice_scene(heroi_obj)
+                    except Exception:
+                        ru_res = {'choice': 'next'}
+
+                    res2 = main_battle.run_battle(start_fase=1)
+                    if res2 == 'victory':
+                        try:
+                            dialogo_pygame.dialogo_pos_nivel_2()
+                        except Exception:
+                            pass
+                    elif res2 == 'quit':
+                        state = 'MENU'
+                        continue
+
+                    # Nível 3
+                    try:
+                        dialogo_pygame.dialogo_nivel_3()
+                    except Exception:
+                        pass
+
+                    res3 = main_battle.run_battle(start_fase=2)
+                    if res3 == 'victory':
+                        try:
+                            dialogo_pygame.dialogo_pos_nivel_3()
+                        except Exception:
+                            pass
+                    elif res3 == 'quit':
+                        state = 'MENU'
+                        continue
+
+                    # Nível 4 - final
+                    try:
+                        dialogo_pygame.dialogo_nivel_4()
+                    except Exception:
+                        pass
+
+                    res4 = main_battle.run_battle(start_fase=3)
+                    if res4 == 'victory':
+                        try:
+                            dialogo_pygame.dialogo_conclusao()
+                        except Exception:
+                            pass
+                    state = 'MENU'
                 except Exception:
-                    Util.certo_txt('Erro ao executar sequência de diálogos. Retornando ao menu.')
+                    Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
                     Util.pausa(1)
                 state = 'MENU'
 
@@ -542,17 +605,78 @@ def main():
                         pass
 
                     try:
-                        completed = dialogo_pygame.dialogo_intro_cleyton()
+                        dialogo_pygame.dialogo_intro_cleyton()
                     except Exception:
-                        Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton. Retornando ao menu.')
+                        Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
                         Util.pausa(1)
 
+                    # Nível 1
                     try:
-                        dialogo_pygame.ru_choice_scene(selection)
+                        dialogo_pygame.dialogo_nivel_1()
                     except Exception:
                         pass
+
+                    res = main_battle.run_battle(start_fase=0)
+                    if res == 'victory':
+                        try:
+                            dialogo_pygame.dialogo_pos_nivel_1()
+                        except Exception:
+                            pass
+                    elif res == 'quit':
+                        state = 'MENU'
+                        continue
+
+                    # Nível 2
+                    try:
+                        dialogo_pygame.dialogo_nivel_2()
+                    except Exception:
+                        pass
+
+                    try:
+                        ru_res = dialogo_pygame.ru_choice_scene(selection)
+                    except Exception:
+                        ru_res = {'choice': 'next'}
+
+                    res2 = main_battle.run_battle(start_fase=1)
+                    if res2 == 'victory':
+                        try:
+                            dialogo_pygame.dialogo_pos_nivel_2()
+                        except Exception:
+                            pass
+                    elif res2 == 'quit':
+                        state = 'MENU'
+                        continue
+
+                    # Nível 3
+                    try:
+                        dialogo_pygame.dialogo_nivel_3()
+                    except Exception:
+                        pass
+
+                    res3 = main_battle.run_battle(start_fase=2)
+                    if res3 == 'victory':
+                        try:
+                            dialogo_pygame.dialogo_pos_nivel_3()
+                        except Exception:
+                            pass
+                    elif res3 == 'quit':
+                        state = 'MENU'
+                        continue
+
+                    # Nível 4
+                    try:
+                        dialogo_pygame.dialogo_nivel_4()
+                    except Exception:
+                        pass
+
+                    res4 = main_battle.run_battle(start_fase=3)
+                    if res4 == 'victory':
+                        try:
+                            dialogo_pygame.dialogo_conclusao()
+                        except Exception:
+                            pass
                 except Exception:
-                    Util.certo_txt('Erro ao iniciar cena de diálogo. Retornando ao menu.')
+                    Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
                     Util.pausa(1)
                 state = 'MENU'
 
