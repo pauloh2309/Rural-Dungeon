@@ -12,8 +12,9 @@ Lore: Um dia, um aluno que estava cansado de tanto reprovar, e com medo de ser j
 | random | utilizado em alguns trechos de código para gerar valores aleatórios |
 | colorama | para imprimir textos coloridos |
 
+# Imagens da primeira versão do jogo
 
-
+<img width="2528" height="1696" alt="Gemini_Generated_Image_oh1g0woh1g0woh1g" src="" />
 
 
 
