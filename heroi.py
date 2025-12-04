@@ -11,7 +11,6 @@ class Heroi(Personagem):
         self.xp = xp
         self.xp_max = xp_max
         self.nivel = nivel
-        # nível atual inicializado com o nível informado
         self.nivel_atual = nivel
 
 
@@ -70,9 +69,5 @@ class Heroi(Personagem):
             self.xp -= self.xp_max
             self.xp_max = int(self.xp_max * 1.25)
     def pontos_nivel(self):
-        """Retorna a quantidade de pontos de status concedidos ao subir de nível.
-
-        Implementação mínima: 5 pontos por nível acima do 1.
-        """
         return max(0, (self.nivel - 1) * 5)
 

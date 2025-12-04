@@ -11,17 +11,8 @@ pygame.display.set_caption("Rural Dungeon")
 clock = pygame.time.Clock()
 
 
-# ---------------- FUNÇÃO PARA CARREGAR ANIMAÇÕES ----------------
 def load_frames(path, scale=3):
-    """Carrega todos os frames de uma pasta, escalando-os.
-
-    - `path`: caminho para a pasta contendo imagens de frames.
-    - `scale`: fator inteiro para multiplicar largura/altura (ex.: 3).
-
-    Retorna uma lista de `Surface`. Em caso de erro retorna uma lista
-    com um `Surface` placeholder transparente para evitar que o código que
-    consome os frames quebre.
-    """
+    
     frames = []
 
     if not os.path.exists(path):
@@ -57,7 +48,6 @@ def load_frames(path, scale=3):
     return frames
 
 
-# Carrega áudios (global, usado pela classe Fighter)
 sounds = {}
 music = None
 try:
@@ -69,7 +59,6 @@ except Exception as exc:
     print(f"Erro ao carregar áudios: {exc}")
 
 
-# ----------------------- CLASSE DO LUTADOR -----------------------
 class Fighter:
     def __init__(self, name, sprite_path, x, y, max_hp, attack):
         self.name = name
@@ -80,7 +69,6 @@ class Fighter:
         self.attack_power = attack
         self.special_charge = 0
         self.dead = False
-        # Controla flip horizontal por instância (False = não inverter)
         self.flip_horiz = False
 
         self.anim = {
@@ -94,7 +82,6 @@ class Fighter:
         self.frame = 0
         self.timer = 0
         self.frame_speed = 120
-        # Contador de trufas usadas nesta luta
         self.trufas_used = 0
 
     def play(self, name):
@@ -121,7 +108,6 @@ class Fighter:
 
     def draw(self, surf):
         img = self.anim[self.state][self.frame]
-        # Use o atributo `flip_horiz` para decidir inversão horizontal.
         if getattr(self, "flip_horiz", False):
             img = pygame.transform.flip(img, True, False)
 
@@ -137,7 +123,6 @@ class Fighter:
         target.take_damage(dmg)
         self.special_charge = min(100, self.special_charge + 20)
 
-        # Toca som de ataque do jogador se for um ataque do jogador (Miguel)
         if "Miguel" in self.name and 'hit_jogador' in sounds:
             try:
                 sounds['hit_jogador'].play()
@@ -154,7 +139,6 @@ class Fighter:
         else:
             self.play("hurt")
 
-        # Toca som de dano do inimigo se o alvo for o jogador
         if "Miguel" in self.name and amount > 0 and 'dano_inimigo' in sounds:
             try:
                 sounds['dano_inimigo'].play()
@@ -165,7 +149,6 @@ class Fighter:
         self.hp = min(self.max_hp, self.hp + amount)
 
 
-# --------------------------- BOTÃO ---------------------------
 class Button:
     def __init__(self, text, x, y):
         self.rect = pygame.Rect(x, y, 230, 50)
@@ -177,7 +160,6 @@ class Button:
         pygame.draw.rect(surf, (200, 200, 200), self.rect, 2, border_radius=8)
         icon = getattr(self, "icon", None)
         if icon:
-            # centraliza icon verticalmente no retângulo
             icon_y = self.rect.y + (self.rect.height - icon.get_height()) // 2
             surf.blit(icon, (self.rect.x + 10, icon_y))
             text_x = self.rect.x + 10 + icon.get_width() + 8
@@ -192,8 +174,6 @@ class Button:
         return self.rect.collidepoint(pos)
 
 
-# --------------------------- BOTÕES ---------------------------
-# Carrega ícone da trufa (usado ao lado do botão TRUFA)
 trufa_icon = None
 try:
     trufa_icon = pygame.image.load(os.path.join("trufa", "trufa_icon.jpg")).convert_alpha()
@@ -205,12 +185,10 @@ btn_attack = Button("ATACAR", 50, 540)
 btn_special = Button("ESPECIAL", 350, 540)
 btn_trufa = Button("TRUFA", 650, 540)
 
-# Anexa ícone ao botão de trufa (se carregado)
 if trufa_icon:
     btn_trufa.icon = trufa_icon
 
 
-# --------------------------- FASES ---------------------------
 Fases = [
     ("Goblin_adm_oco", "backgrounds/bg_adm.png", 150),
     ("Robo_natureza_oco", "backgrounds/bg_sustent.png", 200),
@@ -229,26 +207,20 @@ def carregar_fase():
 
     player = Fighter("Miguel", "FramesAnimacoes/miguel_oco", 150, 300, 120, 25)
     enemy = Fighter(nome, f"FramesAnimacoes/{nome}", 650, 300, hp, 18)
-    # Player mantém orientação padrão; inverter apenas o inimigo para olhar para a esquerda
     player.flip_horiz = False
     enemy.flip_horiz = True
-    # Balanceamento: reduzir um pouco o dano base do inimigo
     enemy.attack_power = max(1, int(enemy.attack_power * 0.7))
-    # Resetar contador de trufas do jogador no início da fase
     player.trufas_used = 0
-    # Se inverter o inimigo, pré-aplica o flip em todos os frames para garantir
-    # que a orientação fique consistente independentemente do draw().
     if enemy.flip_horiz:
         for key, frames in enemy.anim.items():
             enemy.anim[key] = [pygame.transform.flip(img, True, False) for img in frames]
 
     print(f"Fase {fase}: player.flip_horiz={player.flip_horiz}, enemy.flip_horiz={enemy.flip_horiz}")
 
-    # Inicia música de tema em loop
     if music:
         try:
             mixer.music.load(music)
-            mixer.music.set_volume(0.85)  # Reduz volume em 15% (0.85 = 85%)
+            mixer.music.set_volume(0.85) 
             mixer.music.play(-1)
         except Exception as exc:
             print(f"Erro ao tocar música tema: {exc}")
@@ -258,12 +230,10 @@ carregar_fase()
 
 
 def game_over_screen():
-    """Mostra tela de Game Over com opções de tentar novamente e sair."""
     title_font = pygame.font.SysFont("Arial", 64)
     btn_retry = Button("Tentar Novamente", WIDTH // 2 - 180, HEIGHT // 2 + 20)
     btn_quit = Button("Sair", WIDTH // 2 + 20, HEIGHT // 2 + 20)
 
-    # Overlay semitransparente
     overlay = pygame.Surface((WIDTH, HEIGHT))
     overlay.set_alpha(180)
     overlay.fill((0, 0, 0))
@@ -276,7 +246,6 @@ def game_over_screen():
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 pos = e.pos
                 if btn_retry.clicked(pos):
-                    # Reinicia o jogo
                     global fase
                     fase = 0
                     carregar_fase()
@@ -285,7 +254,6 @@ def game_over_screen():
                     pygame.quit()
                     sys.exit()
 
-        # Desenha background + overlay
         try:
             screen.blit(background, (0, 0))
         except Exception:
@@ -303,7 +271,6 @@ def game_over_screen():
 
 
 def pause_menu():
-    """Menu de pausa com controle de volume."""
     global music
     title_font = pygame.font.SysFont("Arial", 48)
     font_small = pygame.font.SysFont("Arial", 20)
@@ -311,7 +278,6 @@ def pause_menu():
     btn_resume = Button("Continuar", WIDTH // 2 - 115, HEIGHT // 2 - 50)
     btn_quit_pause = Button("Sair", WIDTH // 2 - 115, HEIGHT // 2 + 20)
     
-    # Controle de volume
     volume_slider_x = WIDTH // 2 - 100
     volume_slider_y = HEIGHT // 2 - 120
     volume_slider_width = 200
@@ -327,17 +293,14 @@ def pause_menu():
                 pygame.quit()
                 sys.exit()
             
-            # ESC para continuar
             if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
                 return
             
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 pos = e.pos
                 
-                # Clique no slider de volume
                 if (volume_slider_y <= pos[1] <= volume_slider_y + volume_slider_height and
                     volume_slider_x <= pos[0] <= volume_slider_x + volume_slider_width):
-                    # Calcula novo volume (0.0 a 1.0)
                     new_vol = (pos[0] - volume_slider_x) / volume_slider_width
                     mixer.music.set_volume(max(0.0, min(1.0, new_vol)))
                 
@@ -348,7 +311,6 @@ def pause_menu():
                     pygame.quit()
                     sys.exit()
             
-            # Drag do slider
             if e.type == pygame.MOUSEMOTION and pygame.mouse.get_pressed()[0]:
                 pos = e.pos
                 if (volume_slider_y <= pos[1] <= volume_slider_y + volume_slider_height and
@@ -356,18 +318,15 @@ def pause_menu():
                     new_vol = (pos[0] - volume_slider_x) / volume_slider_width
                     mixer.music.set_volume(max(0.0, min(1.0, new_vol)))
         
-        # Desenha background + overlay
         try:
             screen.blit(background, (0, 0))
         except Exception:
             screen.fill((0, 0, 0))
         screen.blit(overlay, (0, 0))
         
-        # Título
         title = title_font.render("PAUSADO", True, (255, 255, 255))
         screen.blit(title, ((WIDTH - title.get_width()) // 2, HEIGHT // 2 - 200))
         
-        # Volume label e slider
         vol_label = font_small.render(f"Volume música: {int(mixer.music.get_volume() * 100)}%", True, (255, 255, 255))
         screen.blit(vol_label, (volume_slider_x, volume_slider_y - 30))
         
@@ -375,7 +334,6 @@ def pause_menu():
         current_vol = mixer.music.get_volume()
         pygame.draw.rect(screen, (0, 200, 100), (volume_slider_x, volume_slider_y, volume_slider_width * current_vol, volume_slider_height))
         
-        # Instruções
         instructions = font_small.render("ESC para continuar | Clique no slider para ajustar volume", True, (200, 200, 200))
         screen.blit(instructions, ((WIDTH - instructions.get_width()) // 2, HEIGHT // 2 + 120))
         
@@ -386,7 +344,6 @@ def pause_menu():
         clock.tick(60)
 
 
-# --------------------------- LOOP DO JOGO ---------------------------
 turno_jogador = True
 esperando = False
 delay = 0
@@ -396,46 +353,37 @@ running = True
 while running:
     screen.blit(background, (0, 0))
 
-    # HUD
     pygame.draw.rect(screen, (0, 0, 0), (0, 500, WIDTH, 140))
 
-    # HP Player
     pygame.draw.rect(screen, (180, 0, 0), (50, 520, 300, 20))
     pygame.draw.rect(screen, (0, 200, 0), (50, 520, 300 * (player.hp / player.max_hp), 20))
     screen.blit(font.render("HP Jogador", True, (255, 255, 255)), (50, 495))
 
-    # HP Enemy
     pygame.draw.rect(screen, (180, 0, 0), (600, 520, 300, 20))
     pygame.draw.rect(screen, (0, 200, 0), (600, 520, 300 * (enemy.hp / enemy.max_hp), 20))
     screen.blit(font.render("HP Inimigo", True, (255, 255, 255)), (600, 495))
 
-    # Especial
     pygame.draw.rect(screen, (80, 80, 80), (350, 505, 230, 8))
     pygame.draw.rect(screen, (0, 120, 255), (350, 505, 230 * (player.special_charge / 100), 8))
     screen.blit(font.render("Especial", True, (255, 255, 255)), (350, 480))
 
-    # Trufas restantes
     trufas_rest = max(0, 5 - getattr(player, 'trufas_used', 0))
     screen.blit(font.render(f"Trufas: {trufas_rest}/5", True, (255, 255, 255)), (650, 480))
 
-    # Botões
     btn_attack.draw(screen)
     btn_special.draw(screen)
     btn_trufa.draw(screen)
 
-    # personagens
     player.update()
     enemy.update()
     player.draw(screen)
     enemy.draw(screen)
 
-    # eventos
     for e in pygame.event.get():
         if e.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
-        # ESC para pausar
         if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
             pause_menu()
 
@@ -449,7 +397,6 @@ while running:
                 delay = pygame.time.get_ticks()
 
             if btn_trufa.clicked(pos):
-                # Limite: máximo 5 trufas por luta
                 if getattr(player, 'trufas_used', 0) < 5:
                     player.heal(30)
                     player.special_charge = min(100, player.special_charge + 20)
@@ -457,7 +404,6 @@ while running:
                     turno_jogador = False
                     esperando = True
                     delay = pygame.time.get_ticks()
-                    # Toca som de cura da trufa
                     if 'cura_trufa' in sounds:
                         try:
                             sounds['cura_trufa'].play()
@@ -472,7 +418,6 @@ while running:
                 esperando = True
                 delay = pygame.time.get_ticks()
 
-    # turno do inimigo
     if esperando and pygame.time.get_ticks() - delay > 700:
         esperando = False
 
@@ -481,21 +426,18 @@ while running:
 
         turno_jogador = True
 
-    # troca de fase
     if enemy.dead:
         fase += 1
-        mixer.music.stop()  # Para a música ao vencer
+        mixer.music.stop()
         if fase >= len(Fases):
             print("Você venceu o jogo!")
             pygame.quit()
             sys.exit()
         carregar_fase()
 
-    # Se o jogador morreu, entra na tela de Game Over
     if player.dead:
-        mixer.music.stop()  # Para a música ao perder
+        mixer.music.stop()  
         game_over_screen()
-        # Após tentar novamente, garantimos estado inicial
         turno_jogador = True
         esperando = False
 

@@ -1,12 +1,4 @@
-"""Pygame-based menu + herói creator.
 
-Menu options:
-- "Comecar": abre a tela gráfica de criação do herói
-- "Sair": fecha o jogo
-
-Depois de criar o herói (nome + alocar 120 pontos entre atributos),
-os dados são salvos em `save_heroi.json` e o objeto `Heroi` é instanciado.
-"""
 
 import json
 import pygame
@@ -16,7 +8,6 @@ from util import Util
 import dialogo_pygame
 
 
-# Configurações
 SCREEN_W = 1024
 SCREEN_H = 720
 FPS = 60
@@ -44,17 +35,15 @@ class Button:
         self.color = color
 
     def draw(self, surf, mouse_pos=None):
-        # shadow
         shadow_rect = self.rect.move(4, 6)
         pygame.draw.rect(surf, (30, 30, 30), shadow_rect, border_radius=8)
 
         color = self.color
-        # hover effect: lighten color a bit
         if mouse_pos and self.rect.collidepoint(mouse_pos):
             color = tuple(min(255, c + 30) for c in color)
 
         pygame.draw.rect(surf, color, self.rect, border_radius=8)
-        # centered text
+
         font = pygame.font.SysFont(None, 28)
         text_surf = font.render(self.text, True, WHITE if color != GRAY else BLACK)
         text_rect = text_surf.get_rect(center=self.rect.center)
@@ -84,7 +73,6 @@ def save_heroi_to_file(heroi, path='save_heroi.json'):
 
 
 def save_personagem_file(heroi, path='save_personagem.json'):
-    # personagem1.Personagem fields: nome, vida, defesa, ataque, iniciativa,dinheiro, estamina, encontrou_bowser
     data = {
         'nome': heroi.nome,
         'vida': heroi.vida,
@@ -104,7 +92,6 @@ def save_hero_individual(heroi, folder='heroes'):
     """Save each created hero into a separate file so they can be selected later."""
     try:
         os.makedirs(folder, exist_ok=True)
-        # safe filename: name + timestamp
         import time
         safe_name = ''.join(c for c in heroi.nome if c.isalnum() or c in (' ', '_')).strip().replace(' ', '_')
         filename = f'{safe_name}_{int(time.time())}.json'
@@ -162,7 +149,6 @@ def start_game_with_heroi(heroi):
 def hero_creation_screen(screen):
     clock = pygame.time.Clock()
 
-    # initial attributes
     total_points = 120
     min_stat = 1
     stats = {
@@ -176,10 +162,8 @@ def hero_creation_screen(screen):
     name = ''
     name_active = False
 
-    # buttons for each stat: +/-
     buttons = {}
     start_x = 100
-    # moved stats further down so name box isn't overlapped
     start_y = 200
     gap_y = 60
     for i, key in enumerate(stats.keys()):
@@ -195,15 +179,12 @@ def hero_creation_screen(screen):
     active_stat = None
     stat_inputs = {k: str(v) for k, v in stats.items()}
 
-    # cursor for typing
     cursor_timer = 0
     cursor_visible = True
     font_input = pygame.font.SysFont(None, 26)
-    # modal text input state (safer typing UX)
     input_modal_active = False
     input_text = ''
 
-    # try to load a background image for the creation screen
     bg_img = None
     try:
         bg_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'ceagri menu.jpg')
@@ -225,10 +206,8 @@ def hero_creation_screen(screen):
                 return None
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = event.pos
-                # stat buttons
                 for key in stats.keys():
                     if buttons[f'{key}_plus'].is_clicked(pos):
-                        # check remaining points
                         used = sum(int(stat_inputs[k]) if stat_inputs.get(k, '') != '' else 0 for k in stats.keys())
                         if used < total_points:
                             stats[key] += 1
@@ -238,7 +217,6 @@ def hero_creation_screen(screen):
                             stats[key] -= 1
                             stat_inputs[key] = str(stats[key])
 
-                # click on name box to activate name typing
                 name_rect = Rect(50, 110, 400, 40)
                 if name_rect.collidepoint(pos):
                     name_active = True
@@ -247,10 +225,8 @@ def hero_creation_screen(screen):
                 else:
                     name_active = False
 
-                # click on stat label to open modal input (more reliable typing)
                 for i, key in enumerate(stats.keys()):
                     y = start_y + i * gap_y
-                    # label rect extended to include the value area so clicking value also activates typing
                     label_rect = Rect(start_x, y, 360, 32)
                     if label_rect.collidepoint(pos):
                         active_stat = key
@@ -262,7 +238,6 @@ def hero_creation_screen(screen):
                         break
 
                 if confirm_btn.is_clicked(pos):
-                    # validate
                     used = sum(stats.values())
                     if used != total_points:
                         message = f'Atribua todos os pontos: {used}/{total_points}'
@@ -271,7 +246,6 @@ def hero_creation_screen(screen):
                         message = 'Insira um nome para o herói.'
                         msg_timer = 120
                     else:
-                        # create Heroi and save
                         heroi = Heroi(nome=name.strip(), vida=stats['vida'], defesa=stats['defesa'], ataque=stats['ataque'], iniciativa=stats['iniciativa'], dinheiro_inicial=10.5, estamina=stats['estamina'])
                         save_heroi_to_file(heroi)
                         return heroi
@@ -281,21 +255,18 @@ def hero_creation_screen(screen):
 
             elif event.type == pygame.KEYDOWN:
                 if input_modal_active:
-                    # handle modal input keys
                     if event.key == pygame.K_BACKSPACE:
                         input_text = input_text[:-1]
                     elif event.key == pygame.K_ESCAPE:
                         input_modal_active = False
                         input_text = ''
                     elif event.key == pygame.K_RETURN:
-                        # try to apply input_text to active_stat
                         try:
                             newv = int(input_text) if input_text != '' else 0
                             if newv < min_stat:
                                 message = 'Valor mínimo por atributo é 1.'
                                 msg_timer = 120
                             else:
-                                # tentative check: compute tentative total with this value
                                 tentative = 0
                                 for k in stat_inputs.keys():
                                     if k == active_stat:
@@ -306,7 +277,6 @@ def hero_creation_screen(screen):
                                         except Exception:
                                             tentative += stats[k]
 
-                                # allow applying even if tentative != total_points — user can adjust others before confirm
                                 stat_inputs[active_stat] = str(newv)
                                 stats[active_stat] = newv
                                 input_modal_active = False
@@ -315,11 +285,9 @@ def hero_creation_screen(screen):
                             message = 'Valor inválido. Digite apenas números.'
                             msg_timer = 120
                     else:
-                        # accept digits only
                         if event.unicode.isdigit() and len(input_text) < 4:
                             input_text += event.unicode
                 else:
-                    # general keys for name editing only when name box is active
                     if name_active:
                         if event.key == pygame.K_BACKSPACE:
                             name = name[:-1]
@@ -327,23 +295,18 @@ def hero_creation_screen(screen):
                             if len(name) < 20 and (event.unicode.isprintable()):
                                 name += event.unicode
 
-        # draw
         if bg_img:
             screen.blit(bg_img, (0, 0))
-            # dim background slightly to make UI pop
             overlay = pygame.Surface((SCREEN_W, SCREEN_H), flags=pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 40))
             screen.blit(overlay, (0, 0))
         else:
-            # gradient-like background for nicer look
             screen.fill((240, 245, 250))
             pygame.draw.rect(screen, (220, 235, 250), (0, 0, SCREEN_W, SCREEN_H // 3))
 
-        # header box
         pygame.draw.rect(screen, BLUE, (40, 20, SCREEN_W - 80, 80), border_radius=8)
         draw_text(screen, 'Criacao de Heroi', 40, 60, 30, color=WHITE)
 
-        # name box
         name_box_rect = Rect(50, 110, 400, 40)
         pygame.draw.rect(screen, (245,245,245), name_box_rect, border_radius=6)
         name_display = f'Nome: {name}'
@@ -351,7 +314,6 @@ def hero_creation_screen(screen):
             name_display += '_'
         draw_text(screen, name_display, 28, 60, 118)
 
-        # compute tentative total from current stat_inputs (reflects typed values)
         try:
             tentative = sum(int(stat_inputs[k]) if stat_inputs.get(k, '') != '' else 0 for k in stats.keys())
         except Exception:
@@ -359,29 +321,22 @@ def hero_creation_screen(screen):
 
         remaining = total_points - tentative
         draw_text(screen, f'Pontos usados: {tentative} / {total_points}', 24, 60, 160)
-        # remaining points display
         rem_color = GREEN if remaining == 0 else RED
         draw_text(screen, f'Pontos restantes: {remaining}', 22, 60, 190, color=rem_color)
 
-        # draw stats with small bars
         for i, (key, val) in enumerate(stats.items()):
             y = start_y + i * gap_y
             label_rect = Rect(start_x, y, 240, 32)
-            # background for label
             pygame.draw.rect(screen, (230,230,230), label_rect, border_radius=6)
             color_label = BLACK if active_stat != key else BLUE
             draw_text(screen, f'{key.capitalize()}:', 26, start_x + 8, y + 4, color=color_label)
-            # value (either typed or current)
             val_text = stat_inputs[key] if active_stat == key else str(val)
-            # render text to compute cursor position
             txt_surf = font_input.render(val_text, True, BLACK)
             screen.blit(txt_surf, (start_x + 160, y + 4))
-            # draw cursor when active
             if active_stat == key and cursor_visible:
                 cursor_x = start_x + 160 + txt_surf.get_width() + 6
                 pygame.draw.rect(screen, BLACK, (cursor_x, y + 8, 2, 20))
 
-            # bars
             bar_x = start_x + 420
             bar_w = 380
             pct = val / total_points
@@ -394,7 +349,6 @@ def hero_creation_screen(screen):
         confirm_btn.draw(screen)
         cancel_btn.draw(screen)
 
-        # input modal (center) when active
         if input_modal_active and active_stat:
             modal_w = 520
             modal_h = 140
@@ -402,25 +356,20 @@ def hero_creation_screen(screen):
             my = (SCREEN_H - modal_h) // 2
             modal = pygame.Surface((modal_w, modal_h), flags=pygame.SRCALPHA)
             modal.fill((10, 10, 10, 220))
-            # draw box
             screen.blit(modal, (mx, my))
             draw_text(screen, f'Insira o valor para {active_stat.capitalize()}:', 24, mx + 20, my + 18, color=WHITE)
-            # input box
             pygame.draw.rect(screen, (245,245,245), (mx + 20, my + 56, modal_w - 40, 40), border_radius=6)
-            # input text
             input_display = input_text if input_text != '' else stat_inputs.get(active_stat, '')
             txt_surf = font_input.render(input_display + ('_' if cursor_visible else ''), True, BLACK)
             screen.blit(txt_surf, (mx + 28, my + 64))
 
         if message:
-            # modal message centered with high contrast on bottom
             modal_w = 640
             modal_h = 80
             mx = (SCREEN_W - modal_w) // 2
             my = SCREEN_H - modal_h - 40
             modal_surf = pygame.Surface((modal_w, modal_h), flags=pygame.SRCALPHA)
             modal_surf.fill((0, 0, 0, 200))
-            # rounded effect: draw rect directly on screen for simplicity
             screen.blit(modal_surf, (mx, my))
             draw_text(screen, message, 26, mx + 20, my + 24, color=WHITE)
             msg_timer -= 1
@@ -449,25 +398,22 @@ def hero_selection_screen(screen):
                 return None
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = event.pos
-                # check each displayed hero box
                 for i, (path, data) in enumerate(files):
                     y = offset_y + i * 84
                     box = Rect(60, y, SCREEN_W - 120, 72)
                     if box.collidepoint(pos):
-                        # create Heroi from data
                         try:
                             h = Heroi(nome=data.get('nome',''), vida=data.get('vida',1), defesa=data.get('defesa',1), ataque=data.get('ataque',1), iniciativa=data.get('iniciativa',0), dinheiro_inicial=data.get('dinheiro',10.5), estamina=data.get('estamina',1))
                             return h
                         except Exception:
                             continue
-                # back button
+                
                 if Rect(880, 40, 100, 40).collidepoint(pos):
                     return None
 
-        # draw
+        
         screen.fill((18,18,30))
         draw_text(screen, 'Selecionar Heroi', 44, 40, 30, color=WHITE)
-        # draw list
         if not files:
             draw_text(screen, 'Nenhum herói salvo encontrado.', 28, 60, offset_y, color=WHITE)
             draw_text(screen, 'Crie um herói primeiro.', 20, 60, offset_y + 40, color=WHITE)
@@ -480,7 +426,6 @@ def hero_selection_screen(screen):
                 info = f"Vida: {data.get('vida',1)}  Ataque: {data.get('ataque',1)}  Defesa: {data.get('defesa',1)}"
                 draw_text(screen, info, 20, box.x + 12, box.y + 38, color=(200,200,200))
 
-        # back button
         back_btn = Button((880, 40, 100, 40), 'Voltar', RED)
         mx,my = pygame.mouse.get_pos()
         back_btn.draw(screen, mouse_pos=(mx,my))
@@ -492,7 +437,6 @@ def hero_selection_screen(screen):
 
 def main():
     pygame.init()
-    # iniciar mixer para música de fundo
     try:
         pygame.mixer.init()
         music_path = os.path.join(os.path.dirname(__file__), 'Sons', 'awesomeness.wav')
@@ -501,13 +445,11 @@ def main():
             pygame.mixer.music.set_volume(0.6)
             pygame.mixer.music.play(-1)
     except Exception:
-        # falha em iniciar áudio não deve travar o jogo
         pass
     screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
     pygame.display.set_caption('Rural Dungeon - Menu')
     clock = pygame.time.Clock()
 
-    # Buttons - centered and evenly spaced
     btn_width, btn_height = 360, 84
     btn_x = (SCREEN_W - btn_width) // 2
     spacing = 28
@@ -535,7 +477,6 @@ def main():
                         running = False
 
         if state == 'MENU':
-            # try to load menu background
             menu_bg = None
             try:
                 bg_path = os.path.join(os.path.dirname(__file__), 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
@@ -562,29 +503,22 @@ def main():
             if heroi_obj is None:
                 state = 'MENU'
             else:
-                # heroi criado e salvo
-                # salvar também no formato Personagem
                 save_personagem_file(heroi_obj)
-                # save individual hero file for selection later
                 save_hero_individual(heroi_obj)
                 Util.certo_txt(f'Herói {heroi_obj.nome} criado e salvo em save_heroi.json e save_personagem.json')
                 Util.pausa(1)
-                # start first dialog sequence: térreo (NPC) -> introdução com Mestre Cleyton -> decisão RU/next
                 try:
-                    # diálogo térreo (NPC)
                     try:
                         dialogo_pygame.dialogo_terreo()
                     except Exception:
                         pass
 
-                    # introdução com Mestre Cleyton
                     try:
                         dialogo_pygame.dialogo_intro_cleyton()
                     except Exception:
                         Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton. Retornando ao menu.')
                         Util.pausa(1)
 
-                    # após os diálogos, mostrar a interface de decisão (RU ou próximo nível)
                     try:
                         dialogo_pygame.ru_choice_scene(heroi_obj)
                     except Exception:
@@ -595,17 +529,13 @@ def main():
                 state = 'MENU'
 
         elif state == 'SELECT':
-            # show selection screen
             selection = hero_selection_screen(screen)
             if selection is None:
                 state = 'MENU'
             else:
-                # selection is a Heroi instance
-                # save and immediately jump to dialog using a matching image if possible
                 save_personagem_file(selection)
                 save_hero_individual(selection)
                 try:
-                    # run NPC dialog first, then Cleyton, then RU choice
                     try:
                         dialogo_pygame.dialogo_terreo()
                     except Exception:

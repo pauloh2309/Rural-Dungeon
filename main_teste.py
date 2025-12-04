@@ -1,6 +1,4 @@
-# rural_dungeon_combined.py
-# Código combinado: menu / criação / seleção de herói (sem RU/bowser) + sistema de batalha
-# Escolha B: após criação/seleção, rodam diálogos e em seguida inicia a batalha.
+
 
 import json
 import os
@@ -12,7 +10,6 @@ from heroi import Heroi
 from util import Util
 import dialogo_pygame
 
-# ------------------------ Configurações gerais ------------------------
 SCREEN_W = 1024
 SCREEN_H = 720
 FPS = 60
@@ -26,7 +23,6 @@ BLUE = (40, 120, 200)
 
 pygame.init()
 
-# inicializa mixer aqui (plugins/driver podem variar)
 try:
     pygame.mixer.init()
 except Exception:
@@ -36,7 +32,6 @@ screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 pygame.display.set_caption("Rural Dungeon")
 clock = pygame.time.Clock()
 
-# ------------------------ Utilitários de UI (menu) ------------------------
 def draw_text(surface, text, size, x, y, color=BLACK):
     font = pygame.font.SysFont(None, size)
     txt = font.render(text, True, color)
@@ -44,14 +39,12 @@ def draw_text(surface, text, size, x, y, color=BLACK):
 
 
 class MenuButton:
-    """Botão usado no menu/criação/seleção (estilo original)."""
     def __init__(self, rect, text, color=GRAY):
         self.rect = Rect(rect)
         self.text = text
         self.color = color
 
     def draw(self, surf, mouse_pos=None):
-        # shadow
         shadow_rect = self.rect.move(4, 6)
         pygame.draw.rect(surf, (30, 30, 30), shadow_rect, border_radius=8)
 
@@ -60,7 +53,6 @@ class MenuButton:
             color = tuple(min(255, c + 30) for c in color)
 
         pygame.draw.rect(surf, color, self.rect, border_radius=8)
-        # centered text
         font = pygame.font.SysFont(None, 28)
         text_surf = font.render(self.text, True, WHITE if color != GRAY else BLACK)
         text_rect = text_surf.get_rect(center=self.rect.center)
@@ -69,7 +61,6 @@ class MenuButton:
     def is_clicked(self, pos):
         return self.rect.collidepoint(pos)
 
-# ------------------------ Salvamento e listagem de heróis ------------------------
 def save_heroi_to_file(heroi, path='save_heroi.json'):
     data = {
         'nome': heroi.nome,
@@ -140,12 +131,9 @@ def list_saved_heroes(folder='heroes'):
                 continue
     return res
 
-# ------------------------ Tela de criação de herói (do seu código original) ------------------------
-# Nota: usei aqui a implementação completa que você forneceu antes (mantida).
 def hero_creation_screen(screen):
     clock_local = pygame.time.Clock()
 
-    # initial attributes
     total_points = 120
     min_stat = 1
     stats = {
@@ -159,7 +147,6 @@ def hero_creation_screen(screen):
     name = ''
     name_active = False
 
-    # buttons for each stat: +/- (usando MenuButton)
     buttons = {}
     start_x = 100
     start_y = 200
@@ -177,15 +164,12 @@ def hero_creation_screen(screen):
     active_stat = None
     stat_inputs = {k: str(v) for k, v in stats.items()}
 
-    # cursor for typing
     cursor_timer = 0
     cursor_visible = True
     font_input = pygame.font.SysFont(None, 26)
-    # modal text input state (safer typing UX)
     input_modal_active = False
     input_text = ''
 
-    # try to load a background image for the creation screen
     bg_img = None
     try:
         bg_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'ceagri menu.jpg')
@@ -207,10 +191,8 @@ def hero_creation_screen(screen):
                 return None
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = event.pos
-                # stat buttons
                 for key in stats.keys():
                     if buttons[f'{key}_plus'].is_clicked(pos):
-                        # check remaining points
                         used = sum(int(stat_inputs[k]) if stat_inputs.get(k, '') != '' else 0 for k in stats.keys())
                         if used < total_points:
                             stats[key] += 1
@@ -220,7 +202,6 @@ def hero_creation_screen(screen):
                             stats[key] -= 1
                             stat_inputs[key] = str(stats[key])
 
-                # click on name box to activate name typing
                 name_rect = Rect(50, 110, 400, 40)
                 if name_rect.collidepoint(pos):
                     name_active = True
@@ -229,9 +210,8 @@ def hero_creation_screen(screen):
                 else:
                     name_active = False
 
-                # click on stat label to open modal input (more reliable typing)
                 for i, key in enumerate(stats.keys()):
-                    y = start_x + i * gap_y  # careful: not used for rect. keep existing below
+                    y = start_x + i * gap_y  
                     y = start_y + i * gap_y
                     label_rect = Rect(start_x, y, 360, 32)
                     if label_rect.collidepoint(pos):
@@ -244,7 +224,6 @@ def hero_creation_screen(screen):
                         break
 
                 if confirm_btn.is_clicked(pos):
-                    # validate
                     used = sum(stats.values())
                     if used != total_points:
                         message = f'Atribua todos os pontos: {used}/{total_points}'
@@ -253,7 +232,6 @@ def hero_creation_screen(screen):
                         message = 'Insira um nome para o herói.'
                         msg_timer = 120
                     else:
-                        # create Heroi and save
                         heroi = Heroi(nome=name.strip(), vida=stats['vida'], defesa=stats['defesa'],
                                       ataque=stats['ataque'], iniciativa=stats['iniciativa'],
                                       dinheiro_inicial=10.5, estamina=stats['estamina'])
@@ -265,14 +243,12 @@ def hero_creation_screen(screen):
 
             elif event.type == pygame.KEYDOWN:
                 if input_modal_active:
-                    # handle modal input keys
                     if event.key == pygame.K_BACKSPACE:
                         input_text = input_text[:-1]
                     elif event.key == pygame.K_ESCAPE:
                         input_modal_active = False
                         input_text = ''
                     elif event.key == pygame.K_RETURN:
-                        # try to apply input_text to active_stat
                         try:
                             newv = int(input_text) if input_text != '' else 0
                             if newv < min_stat:
@@ -297,11 +273,9 @@ def hero_creation_screen(screen):
                             message = 'Valor inválido. Digite apenas números.'
                             msg_timer = 120
                     else:
-                        # accept digits only
                         if event.unicode.isdigit() and len(input_text) < 4:
                             input_text += event.unicode
                 else:
-                    # general keys for name editing only when name box is active
                     if name_active:
                         if event.key == pygame.K_BACKSPACE:
                             name = name[:-1]
@@ -309,7 +283,6 @@ def hero_creation_screen(screen):
                             if len(name) < 20 and (event.unicode.isprintable()):
                                 name += event.unicode
 
-        # draw
         if bg_img:
             screen.blit(bg_img, (0, 0))
             overlay = pygame.Surface((SCREEN_W, SCREEN_H), flags=pygame.SRCALPHA)
@@ -395,7 +368,6 @@ def hero_creation_screen(screen):
 
     return None
 
-# ------------------------ Seleção de herói (igual ao seu original) ------------------------
 def hero_selection_screen(screen):
     clock_local = pygame.time.Clock()
     files = list_saved_heroes()
@@ -446,17 +418,10 @@ def hero_selection_screen(screen):
 
     return None
 
-# ------------------------ Sistema de batalha (encapsulado) ------------------------
 def start_battle_with_heroi(heroi):
-    """
-    Inicia o sistema de batalha utilizando as stats do objeto `heroi`.
-    Ao terminar a batalha (vitória ou derrota), retorna ao menu principal.
-    """
-    # ----- variáveis e funções locais (evitam conflito de nomes) -----
     WIDTH = SCREEN_W
     HEIGHT = SCREEN_H
 
-    # Carregar frames e sons (copiado/adaptado do seu código de batalha)
     def load_frames_local(path, scale=3):
         frames = []
         if not os.path.exists(path):
@@ -485,7 +450,6 @@ def start_battle_with_heroi(heroi):
             return [surf]
         return frames
 
-    # Sons / música
     sounds_local = {}
     music_path = None
     try:
@@ -496,7 +460,6 @@ def start_battle_with_heroi(heroi):
     except Exception as exc:
         print(f"Erro ao carregar áudios (batalha): {exc}")
 
-    # Classe Fighter local
     class FighterLocal:
         def __init__(self, name, sprite_path, x, y, max_hp, attack):
             self.name = name
@@ -580,7 +543,6 @@ def start_battle_with_heroi(heroi):
         def heal(self, amount):
             self.hp = min(self.max_hp, self.hp + amount)
 
-    # Botão local para batalha
     class BattleButton:
         def __init__(self, text, x, y):
             self.rect = pygame.Rect(x, y, 230, 50)
@@ -604,7 +566,6 @@ def start_battle_with_heroi(heroi):
         def clicked(self, pos):
             return self.rect.collidepoint(pos)
 
-    # Carregar ícone de trufa (opcional)
     trufa_icon = None
     try:
         trufa_icon = pygame.image.load(os.path.join("trufa", "trufa_icon.jpg")).convert_alpha()
@@ -612,7 +573,6 @@ def start_battle_with_heroi(heroi):
     except Exception:
         trufa_icon = None
 
-    # Fases (copiado do seu código)
     Fases_local = [
         ("Goblin_adm_oco", "backgrounds/bg_adm.png", 150),
         ("Robo_natureza_oco", "backgrounds/bg_sustent.png", 200),
@@ -622,7 +582,6 @@ def start_battle_with_heroi(heroi):
 
     fase_idx = 0
 
-    # função para carregar fase/batalha
     def carregar_fase_local():
         nonlocal player_local, enemy_local, background_local, fase_idx
         nome, bg_file, hp = Fases_local[fase_idx]
@@ -632,15 +591,12 @@ def start_battle_with_heroi(heroi):
             background_local = pygame.Surface((WIDTH, HEIGHT))
             background_local.fill((20, 20, 40))
 
-        # Usar stats do heroi para o jogador na primeira fase (aplica sempre que iniciar batalha)
-        # Se o heroi tiver nome diferente, usamos o nome dele.
         player_local = FighterLocal(heroi.nome, "FramesAnimacoes/miguel_oco", 150, 220, max(1, int(heroi.vida)), max(1, int(heroi.ataque)))
         enemy_local = FighterLocal(nome, f"FramesAnimacoes/{nome}", 650, 220, hp, 18)
 
         player_local.flip_horiz = False
         enemy_local.flip_horiz = True
 
-        # pequeno balanceamento
         enemy_local.attack_power = max(1, int(enemy_local.attack_power * 0.7))
         player_local.trufas_used = 0
 
@@ -648,7 +604,6 @@ def start_battle_with_heroi(heroi):
             for key, frames in enemy_local.anim.items():
                 enemy_local.anim[key] = [pygame.transform.flip(img, True, False) for img in frames]
 
-        # iniciar música
         if music_path:
             try:
                 pygame.mixer.music.load(music_path)
@@ -657,20 +612,17 @@ def start_battle_with_heroi(heroi):
             except Exception as exc:
                 print(f"Erro ao tocar música tema: {exc}")
 
-    # iniciar fase 0
     player_local = None
     enemy_local = None
     background_local = None
     carregar_fase_local()
 
-    # criar botões locais
     btn_attack = BattleButton("ATACAR", 50, HEIGHT - 140)
     btn_special = BattleButton("ESPECIAL", 350, HEIGHT - 140)
     btn_trufa = BattleButton("TRUFA", 650, HEIGHT - 140)
     if trufa_icon:
         btn_trufa.icon = trufa_icon
 
-    # loop de batalha
     turno_jogador = True
     esperando = False
     delay = 0
@@ -678,48 +630,38 @@ def start_battle_with_heroi(heroi):
 
     running_local = True
     while running_local:
-        # desenha background
         try:
             screen.blit(background_local, (0, 0))
         except Exception:
             screen.fill((10, 10, 30))
 
-        # HUD
         pygame.draw.rect(screen, (0, 0, 0), (0, HEIGHT - 200, WIDTH, 200))
-        # HP player
         pygame.draw.rect(screen, (180, 0, 0), (50, HEIGHT - 180, 300, 20))
         pygame.draw.rect(screen, (0, 200, 0), (50, HEIGHT - 180, 300 * (player_local.hp / max(1, player_local.max_hp)), 20))
         screen.blit(font_local.render(f"HP {player_local.name}", True, WHITE), (50, HEIGHT - 205))
-        # HP enemy
         pygame.draw.rect(screen, (180, 0, 0), (600, HEIGHT - 180, 300, 20))
         pygame.draw.rect(screen, (0, 200, 0), (600, HEIGHT - 180, 300 * (enemy_local.hp / max(1, enemy_local.max_hp)), 20))
         screen.blit(font_local.render(f"HP {enemy_local.name}", True, WHITE), (600, HEIGHT - 205))
-        # Especial
         pygame.draw.rect(screen, (80, 80, 80), (350, HEIGHT - 225, 230, 8))
         pygame.draw.rect(screen, (0, 120, 255), (350, HEIGHT - 225, 230 * (player_local.special_charge / 100), 8))
         screen.blit(font_local.render("Especial", True, WHITE), (350, HEIGHT - 250))
-        # Trufas
         trufas_rest = max(0, 5 - getattr(player_local, 'trufas_used', 0))
         screen.blit(font_local.render(f"Trufas: {trufas_rest}/5", True, WHITE), (650, HEIGHT - 260))
 
-        # botoes
         btn_attack.draw(screen)
         btn_special.draw(screen)
         btn_trufa.draw(screen)
 
-        # desenha personagens
         player_local.update()
         enemy_local.update()
         player_local.draw(screen)
         enemy_local.draw(screen)
 
-        # eventos
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
-                # pausa simples (volta ao menu com ESC durante batalha)
                 pygame.mixer.music.stop()
                 return
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and turno_jogador:
@@ -748,28 +690,23 @@ def start_battle_with_heroi(heroi):
                     esperando = True
                     delay = pygame.time.get_ticks()
 
-        # turno inimigo
         if esperando and pygame.time.get_ticks() - delay > 700:
             esperando = False
             if not enemy_local.dead and not turno_jogador:
                 enemy_local.attack(player_local)
             turno_jogador = True
 
-        # troca de fase
         if enemy_local.dead:
             fase_idx += 1
             pygame.mixer.music.stop()
             if fase_idx >= len(Fases_local):
-                # venceu todas as fases
                 Util.certo_txt("Você venceu o jogo!")
                 Util.pausa(2)
                 return
             carregar_fase_local()
 
-        # game over
         if player_local.dead:
             pygame.mixer.music.stop()
-            # exibe tela de game over local (simplificada)
             title_font = pygame.font.SysFont("Arial", 64)
             btn_retry = BattleButton("Tentar Novamente", WIDTH // 2 - 180, HEIGHT // 2 + 20)
             btn_quit = BattleButton("Sair", WIDTH // 2 + 20, HEIGHT // 2 + 20)
@@ -805,7 +742,6 @@ def start_battle_with_heroi(heroi):
         pygame.display.update()
         clock.tick(60)
 
-# ------------------------ MAIN (menu + integração) ------------------------
 def main():
     pygame.display.set_caption('Rural Dungeon - Menu')
     clock_main = pygame.time.Clock()
@@ -817,7 +753,6 @@ def main():
     select_btn = MenuButton((btn_x, 220 + btn_height + spacing, btn_width, btn_height), 'Selecionar Herói', BLUE)
     exit_btn = MenuButton((btn_x, 220 + 2 * (btn_height + spacing), btn_width, btn_height), 'Sair', RED)
 
-    # tentar tocar música de menu (não obrigatório)
     try:
         music_path_menu = os.path.join(os.path.dirname(__file__), 'Sons', 'awesomeness.wav')
         if os.path.exists(music_path_menu):
@@ -847,7 +782,6 @@ def main():
                         running = False
 
         if state == 'MENU':
-            # menu background
             menu_bg = None
             try:
                 bg_path = os.path.join(os.path.dirname(__file__), 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
@@ -879,7 +813,6 @@ def main():
                 Util.certo_txt(f'Herói {heroi_obj.nome} criado com sucesso!')
                 Util.pausa(1)
 
-                # Diálogos (B): térreo -> introdução do Mestre Cleyton -> depois inicia batalha
                 try:
                     try:
                         dialogo_pygame.dialogo_terreo()
@@ -892,7 +825,6 @@ def main():
                         Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton. Retornando ao menu.')
                         Util.pausa(1)
 
-                    # Após diálogos, iniciar batalha usando o herói criado
                     start_battle_with_heroi(heroi_obj)
 
                 except Exception:
@@ -910,7 +842,6 @@ def main():
                 save_heroi_to_file(heroi_obj)
                 Util.certo_txt(f'Herói {heroi_obj.nome} carregado!')
                 Util.pausa(1)
-                # opcional: começar batalha ao carregar? aqui apenas volta ao menu
                 state = 'MENU'
 
     pygame.quit()
