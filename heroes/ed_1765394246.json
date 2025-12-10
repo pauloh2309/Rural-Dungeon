@@ -1,0 +1,10 @@
+{
+  "nome": "ed",
+  "vida": 30,
+  "defesa": 50,
+  "ataque": 40,
+  "dinheiro": 10.5,
+  "nivel": 1,
+  "xp": 0,
+  "character": "maria"
+}
