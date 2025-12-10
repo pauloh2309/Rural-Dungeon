@@ -16,7 +16,11 @@ Lore: Um dia, um aluno que estava cansado de tanto reprovar, e com medo de ser j
 
 ![Primeira versão](https://github.com/pauloh2309/Rural-Dungeon/blob/main/image.png)
 
+# Atualizações da nova versão
 
-
-
+![Atualizações](https://raw.githubusercontent.com/pauloh2309/Rural-Dungeon/70e2fdea41981f4f08c3f1c6326d2346ff3f9b7c/Fotomenu.png)
+![](https://raw.githubusercontent.com/pauloh2309/Rural-Dungeon/70e2fdea41981f4f08c3f1c6326d2346ff3f9b7c/batalhafeminino.png)
+![](https://raw.githubusercontent.com/pauloh2309/Rural-Dungeon/70e2fdea41981f4f08c3f1c6326d2346ff3f9b7c/dialogofemino.png)
+![](https://raw.githubusercontent.com/pauloh2309/Rural-Dungeon/70e2fdea41981f4f08c3f1c6326d2346ff3f9b7c/escolhaoseupersonagem.png)
+![](https://raw.githubusercontent.com/pauloh2309/Rural-Dungeon/70e2fdea41981f4f08c3f1c6326d2346ff3f9b7c/gameoverscreen.png)
 
