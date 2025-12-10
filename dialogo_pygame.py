@@ -128,14 +128,14 @@ DIALOGO_POS_NIVEL_3 = (
 )
 
 DIALOGO_NIVEL_4_CHEFE = (
-    ("System", "(Finalmente, você alcança o último andar: um data center futurista com racks de servidores e névoa de linhas de código em Python flutuando no ar. No centro está o Robô Robust Python, imponente e com olhos vermelhos.)"),
+    ("Narrador", "(Finalmente, você alcança o último andar: um data center futurista com racks de servidores e névoa de linhas de código em Python flutuando no ar. No centro está o Robô Robust Python, imponente e com olhos vermelhos.)"),
     ("Robô Python", "print(\"Intruso detectado. Inicializando protocolo de eliminação.\")"),
     ("Player", "Então você é o chefão, hein? O grande 'Boss Final'! O gênio da programação que está por trás de toda essa bagunça!"),
     ("Robô Python", "Error: Argumento inválido. Não sou \\\"chefão\\\". Sou a Arquitetura Principal. O Kernel. O Coração da Lógica. Você é apenas um script com erros de sintaxe."),
     ("Player", "Um script com erros? Eu sou o aluno que vai te desinstalar! Você transformou minha faculdade em um jogo de terror e impediu minha formatura! Isso não é legal, cara!"),
     ("Robô Python", "Minha lógica é otimizada. Minha execução é eficiente. Você não possui as bibliotecas necessárias para me derrotar."),
     ("Player", "Pode ser que eu não tenha todas as bibliotecas, mas eu tenho a determinação de um estudante que não quer ser jubilado! E um TCC para defender! Prepare-se para um bug que você não vai conseguir debugar!"),
-    ("System", "(Início da batalha final contra o Robô Robust Python!)"),
+    ("Narrador", "(Início da batalha final contra o Robô Robust Python!)"),
 )
 
 DIALOGO_CONCLUSAO = (
@@ -377,7 +377,10 @@ class CaixaDialogo:
         pygame.draw.rect(superficie_fundo, AZUL_CLARO, (0, 0, self.caixa_rect.width, self.caixa_rect.height), 3, border_radius=10)
         self.tela.blit(superficie_fundo, (self.caixa_rect.x, self.caixa_rect.y))
         
-        nome_renderizado = FONTE_NOME.render(speaker_name, True, BRANCO)
+        # Converter "System" para "Narrador"
+        display_name = 'Narrador' if speaker_name == 'System' else speaker_name
+        
+        nome_renderizado = FONTE_NOME.render(display_name, True, BRANCO)
         pos_nome_x = self.caixa_rect.x + 10
         pos_nome_y = self.caixa_rect.y - 30
         balao_nome_rect = nome_renderizado.get_rect(topleft=(pos_nome_x, pos_nome_y))
@@ -604,7 +607,7 @@ def ru_choice_scene(heroi=None):
                     elif linha.startswith('Bowser:') or linha.startswith('???'):
                         dialog_bowser.append(('Bowser', linha.partition(':')[2].strip()))
                     else:
-                        dialog_bowser.append(('System', linha))
+                        dialog_bowser.append(('Narrador', linha))
 
                 run_dialog_scene(dialog_bowser, player_img, bowser_img, encontro_bg)
 
@@ -814,7 +817,7 @@ def ru_choice_scene(heroi=None):
                                     elif linha.startswith('Bowser:') or linha.startswith('???'):
                                         dialog_bowser.append(('Bowser', linha.partition(':')[2].strip()))
                                     else:
-                                        dialog_bowser.append(('System', linha))
+                                        dialog_bowser.append(('Narrador', linha))
                                 run_dialog_scene(dialog_bowser, player_img, bowser_img, encontro_bg)
                                 res = b.rola_roleta_gui(texto_re)
                                 try:
