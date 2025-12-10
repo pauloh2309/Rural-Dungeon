@@ -2,7 +2,7 @@ import pygame
 import os
 import sys
 
-WIDTH, HEIGHT = 960, 640
+WIDTH, HEIGHT = 1024, 720
 
 
 
@@ -424,9 +424,9 @@ def run_battle(start_fase=0, heroi=None):
     except Exception:
         trufa_icon = None
 
-    btn_attack = Button("ATACAR", 50, 540)
-    btn_special = Button("ESPECIAL", 350, 540)
-    btn_trufa = Button("TRUFA", 650, 540)
+    btn_attack = Button("ATACAR", 50, 620)
+    btn_special = Button("ESPECIAL", 350, 620)
+    btn_trufa = Button("TRUFA", 650, 620)
     if trufa_icon:
         btn_trufa.icon = trufa_icon
 
@@ -444,22 +444,22 @@ def run_battle(start_fase=0, heroi=None):
         except Exception:
             screen.fill((0, 0, 0))
 
-        pygame.draw.rect(screen, (0, 0, 0), (0, 500, WIDTH, 140))
+        pygame.draw.rect(screen, (0, 0, 0), (0, 580, WIDTH, 140))
 
-        pygame.draw.rect(screen, (180, 0, 0), (50, 520, 300, 20))
-        pygame.draw.rect(screen, (0, 200, 0), (50, 520, 300 * (player.hp / player.max_hp), 20))
-        screen.blit(font.render("HP Jogador", True, (255, 255, 255)), (50, 495))
+        pygame.draw.rect(screen, (180, 0, 0), (50, 600, 300, 20))
+        pygame.draw.rect(screen, (0, 200, 0), (50, 600, 300 * (player.hp / player.max_hp), 20))
+        screen.blit(font.render("HP Jogador", True, (255, 255, 255)), (50, 575))
 
-        pygame.draw.rect(screen, (180, 0, 0), (600, 520, 300, 20))
-        pygame.draw.rect(screen, (0, 200, 0), (600, 520, 300 * (enemy.hp / enemy.max_hp), 20))
-        screen.blit(font.render("HP Inimigo", True, (255, 255, 255)), (600, 495))
+        pygame.draw.rect(screen, (180, 0, 0), (650, 600, 300, 20))
+        pygame.draw.rect(screen, (0, 200, 0), (650, 600, 300 * (enemy.hp / enemy.max_hp), 20))
+        screen.blit(font.render("HP Inimigo", True, (255, 255, 255)), (650, 575))
 
-        pygame.draw.rect(screen, (80, 80, 80), (350, 505, 230, 8))
-        pygame.draw.rect(screen, (0, 120, 255), (350, 505, 230 * (player.special_charge / 100), 8))
-        screen.blit(font.render("Especial", True, (255, 255, 255)), (350, 480))
+        pygame.draw.rect(screen, (80, 80, 80), (350, 585, 230, 8))
+        pygame.draw.rect(screen, (0, 120, 255), (350, 585, 230 * (player.special_charge / 100), 8))
+        screen.blit(font.render("Especial", True, (255, 255, 255)), (350, 560))
 
         trufas_rest = max(0, 5 - getattr(player, 'trufas_used', 0))
-        screen.blit(font.render(f"Trufas: {trufas_rest}/5", True, (255, 255, 255)), (650, 480))
+        screen.blit(font.render(f"Trufas: {trufas_rest}/5", True, (255, 255, 255)), (650, 560))
 
         btn_attack.draw(screen)
         btn_special.draw(screen)

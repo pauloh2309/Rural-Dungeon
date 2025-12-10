@@ -122,6 +122,19 @@ def save_hero_individual(heroi, folder='heroes'):
         return None
 
 
+def play_menu_music():
+    """Carrega e toca a música do menu"""
+    try:
+        music_path = os.path.join(os.path.dirname(__file__), 'Sons', 'awesomeness.wav')
+        if os.path.exists(music_path):
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(music_path)
+            pygame.mixer.music.set_volume(0.6)
+            pygame.mixer.music.play(-1)
+    except Exception:
+        pass
+
+
 def list_saved_heroes(folder='heroes'):
 
     res = []
@@ -485,7 +498,7 @@ def character_select_screen(screen):
         except Exception:
             screen.fill((30, 30, 50))
 
-        draw_text(screen, 'Escolha o seu personagem', 40, SCREEN_W // 2 - 220, 120, color=WHITE)
+        draw_text(screen, 'Escolha o seu personagem', 70, SCREEN_W // 2 - 310, 120, color=WHITE)
 
         pygame.draw.rect(screen, (70, 70, 70), btn_miguel, border_radius=8)
         if mig_img:
@@ -758,16 +771,16 @@ def main():
                     except Exception:
                         pass
 
-                    res = main_battle.run_battle(start_fase=0, heroi=heroi_obj)
-                    if res == 'victory':
+                    res3 = main_battle.run_battle(start_fase=2, heroi=heroi_obj)
+                    if res3 == 'victory':
                         try:
-                            dialogo_pygame.dialogo_pos_nivel_1()
+                            dialogo_pygame.dialogo_pos_nivel_3()
                         except Exception:
                             pass
                         
-                    elif res == 'quit':
+                    elif res3 == 'quit':
                         state = 'MENU'
-                        pygame.mixer.music.play(-1)
+                        play_menu_music()
                         continue
 
                     
@@ -787,7 +800,7 @@ def main():
                         
                     elif res2 == 'quit':
                         state = 'MENU'
-                        pygame.mixer.music.play(-1)
+                        play_menu_music()
                         continue
 
                     
@@ -805,7 +818,7 @@ def main():
                         
                     elif res3 == 'quit':
                         state = 'MENU'
-                        pygame.mixer.music.play(-1)
+                        play_menu_music()
                         continue
 
                     
@@ -825,7 +838,7 @@ def main():
                     Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
                     Util.pausa(1)
                 state = 'MENU'
-                pygame.mixer.music.play(-1)
+                play_menu_music()
 
         elif state == 'SELECT':
             selection = hero_selection_screen(screen)
@@ -882,7 +895,7 @@ def main():
                             pass
                     elif res == 'quit':
                         state = 'MENU'
-                        pygame.mixer.music.play(-1)
+                        play_menu_music()
                         continue
 
                     
@@ -901,7 +914,7 @@ def main():
                             pass
                     elif res2 == 'quit':
                         state = 'MENU'
-                        pygame.mixer.music.play(-1)
+                        play_menu_music()
                         continue
 
                     
@@ -918,7 +931,7 @@ def main():
                             pass
                     elif res3 == 'quit':
                         state = 'MENU'
-                        pygame.mixer.music.play(-1)
+                        play_menu_music()
                         continue
 
                     
@@ -937,7 +950,7 @@ def main():
                     Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
                     Util.pausa(1)
                 state = 'MENU'
-                pygame.mixer.music.play(-1)
+                play_menu_music()
 
     pygame.quit()
 

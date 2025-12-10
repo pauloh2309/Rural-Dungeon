@@ -481,7 +481,7 @@ def dialogo_terreo():
     base = os.path.dirname(__file__)
     player_img = _get_player_img_path(base)
     npc_img = os.path.join(base, 'Imagens_dialogos', 'npc_sembg.png')
-    bg_img = os.path.join(base, 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
+    bg_img = os.path.join(base, 'imagens_game', 'ceagri_menu.jpg')
     return run_dialog_scene(DIALOGO_TERREO_INICIO, player_img, npc_img, bg_img)
 
 
