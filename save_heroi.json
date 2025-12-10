@@ -1,9 +1,10 @@
 {
-  "nome": "cayo",
-  "vida": 30,
-  "defesa": 30,
-  "ataque": 60,
+  "nome": "0",
+  "vida": 2,
+  "defesa": 1,
+  "ataque": 117,
   "dinheiro": 10.5,
   "nivel": 1,
-  "xp": 0
+  "xp": 0,
+  "character": "maria"
 }

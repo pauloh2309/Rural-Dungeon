@@ -1,0 +1,9 @@
+{
+  "nome": "Guanabara",
+  "vida": 30,
+  "defesa": 30,
+  "ataque": 30,
+  "dinheiro": 10.5,
+  "nivel": 1,
+  "xp": 0
+}

@@ -111,12 +111,11 @@ class Fighter:
 
         target.take_damage(dmg)
         self.special_charge = min(100, self.special_charge + 20)
-
-        if "Miguel" in self.name and 'hit_jogador' in sounds:
-            try:
+        try:
+            if self.name in ("Miguel", "Maria") and 'hit_jogador' in sounds:
                 sounds['hit_jogador'].play()
-            except Exception as exc:
-                print(f"Erro ao tocar hit_jogador: {exc}")
+        except Exception as exc:
+            print(f"Erro ao tocar hit_jogador: {exc}")
 
     def take_damage(self, amount):
         self.hp -= amount
@@ -128,11 +127,12 @@ class Fighter:
         else:
             self.play("hurt")
 
-        if "Miguel" in self.name and amount > 0 and 'dano_inimigo' in sounds:
-            try:
+
+        try:
+            if self.name in ("Miguel", "Maria") and amount > 0 and 'dano_inimigo' in sounds:
                 sounds['dano_inimigo'].play()
-            except Exception as exc:
-                print(f"Erro ao tocar dano_inimigo: {exc}")
+        except Exception as exc:
+            print(f"Erro ao tocar dano_inimigo: {exc}")
 
     def heal(self, amount):
         self.hp = min(self.max_hp, self.hp + amount)
@@ -198,7 +198,19 @@ def carregar_fase():
         hero_current = 120
         hero_atk = 25
 
-    player = Fighter("Miguel", "FramesAnimacoes/miguel_oco", 150, 300, hero_max, hero_atk)
+    try:
+        choice = getattr(current_heroi, 'character', None)
+    except Exception:
+        choice = None
+
+    if choice and str(choice).lower() == 'maria':
+        player_name = "Maria"
+        sprite_folder = "FramesAnimacoes/maria_oco"
+    else:
+        player_name = "Miguel"
+        sprite_folder = "FramesAnimacoes/miguel_oco"
+
+    player = Fighter(player_name, sprite_folder, 150, 300, hero_max, hero_atk)
 
     try:
         player.hp = max(0, min(player.max_hp, int(hero_current)))
@@ -227,23 +239,33 @@ def carregar_fase():
 
 def game_over_screen():
     title_font = pygame.font.SysFont("Arial", 64)
-    btn_retry = Button("Tentar Novamente", WIDTH // 2 - 180, HEIGHT // 2 + 20)
-    btn_quit = Button("Sair", WIDTH // 2 + 20, HEIGHT // 2 + 20)
+    font_timer = pygame.font.SysFont("Arial", 48)
+    btn_retry = Button("Tentar Novamente", WIDTH // 2 - 220, HEIGHT // 2 + 80)
+    btn_quit = Button("Desistir", WIDTH // 2 + 20, HEIGHT // 2 + 80)
 
     overlay = pygame.Surface((WIDTH, HEIGHT))
     overlay.set_alpha(180)
     overlay.fill((0, 0, 0))
 
+    timer_start = pygame.time.get_ticks()
+    timer_duration = 10000
+
     while True:
+        elapsed = pygame.time.get_ticks() - timer_start
+        remaining_time = max(0, (timer_duration - elapsed) // 1000)
+
         for e in pygame.event.get():
             if e.type == pygame.QUIT:
-                return 'quit'
+                return 'show_gameover'
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 pos = e.pos
                 if btn_retry.clicked(pos):
                     return 'retry'
                 if btn_quit.clicked(pos):
-                    return 'quit'
+                    return 'show_gameover'
+
+        if remaining_time <= 0:
+            return 'show_gameover'
 
         try:
             screen.blit(background, (0, 0))
@@ -254,11 +276,45 @@ def game_over_screen():
         title = title_font.render("Game Over", True, (255, 0, 0))
         screen.blit(title, ((WIDTH - title.get_width()) // 2, HEIGHT // 2 - 120))
 
+        timer_text = font_timer.render(f"Tempo: {remaining_time}s", True, (255, 255, 255))
+        screen.blit(timer_text, ((WIDTH - timer_text.get_width()) // 2, HEIGHT // 2))
+
         btn_retry.draw(screen)
         btn_quit.draw(screen)
 
         pygame.display.update()
         clock.tick(60)
+
+
+def show_gameover_image():
+    try:
+        gameover_sound = None
+        try:
+            gameover_sound_path = os.path.join(os.path.dirname(__file__), 'audios_game', 'gameover_som.mp3')
+            if os.path.exists(gameover_sound_path):
+                pygame.mixer.music.stop()
+                gameover_sound = pygame.mixer.Sound(gameover_sound_path)
+                gameover_sound.play()
+        except Exception:
+            pass
+        
+        gameover_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'gameover.jpg')
+        if os.path.exists(gameover_path):
+            gameover_img = pygame.image.load(gameover_path).convert()
+            gameover_img = pygame.transform.smoothscale(gameover_img, (WIDTH, HEIGHT))
+            screen.blit(gameover_img, (0, 0))
+            pygame.display.update()
+            pygame.time.wait(3000)
+        else:
+            screen.fill((0, 0, 0))
+            font = pygame.font.SysFont("Arial", 48)
+            text = font.render("GAME OVER", True, (255, 0, 0))
+            screen.blit(text, ((WIDTH - text.get_width()) // 2, HEIGHT // 2))
+            pygame.display.update()
+            pygame.time.wait(3000)
+    except Exception as exc:
+        print(f"Erro ao mostrar tela de game over: {exc}")
+        pygame.time.wait(3000)
 
 
 def pause_menu():
@@ -476,26 +532,26 @@ def run_battle(start_fase=0, heroi=None):
         if player.dead:
             mixer.music.stop()
             res = game_over_screen()
-            if res == 'quit':
+            if res == 'retry':
+                try:
+                    if current_heroi is not None:
+                        current_heroi.vida = getattr(current_heroi, 'vidabase', getattr(current_heroi, 'vida', player.max_hp))
+                except Exception:
+                    pass
+                fase = 0
+                carregar_fase()
+                turno_jogador = True
+                esperando = False
+                delay = 0
+                continue
+            if res == 'show_gameover':
+                show_gameover_image()
                 try:
                     if current_heroi is not None:
                         current_heroi.vida = player.hp
                 except Exception:
                     pass
                 return 'quit'
-            if res == 'retry':
-                fase = 0
-
-                try:
-                    if current_heroi is not None:
-                        current_heroi.vida = getattr(current_heroi, 'vidabase', getattr(current_heroi, 'vida', player.max_hp))
-                except Exception:
-                    pass
-                carregar_fase()
-                turno_jogador = True
-                esperando = False
-                delay = 0
-                continue
 
         pygame.display.update()
         clock.tick(60)

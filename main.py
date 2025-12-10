@@ -67,6 +67,11 @@ def save_heroi_to_file(heroi, path='save_heroi.json'):
         'nivel': getattr(heroi, 'nivel', 1),
         'xp': getattr(heroi, 'xp', 0)
     }
+    # Persist character choice if present
+    try:
+        data['character'] = getattr(heroi, 'character', 'miguel')
+    except Exception:
+        data['character'] = 'miguel'
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -81,6 +86,10 @@ def save_personagem_file(heroi, path='save_personagem.json'):
         'encontrou_bowser': getattr(heroi, 'encontrou_bowser', 0),
         'interactions': getattr(heroi, 'interactions', [])
     }
+    try:
+        data['character'] = getattr(heroi, 'character', 'miguel')
+    except Exception:
+        data['character'] = 'miguel'
     with open(path, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -102,6 +111,10 @@ def save_hero_individual(heroi, folder='heroes'):
             'nivel': getattr(heroi, 'nivel', 1),
             'xp': getattr(heroi, 'xp', 0)
         }
+        try:
+            data['character'] = getattr(heroi, 'character', 'miguel')
+        except Exception:
+            data['character'] = 'miguel'
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         return path
@@ -292,7 +305,7 @@ def hero_creation_screen(screen):
             pygame.draw.rect(screen, (220, 235, 250), (0, 0, SCREEN_W, SCREEN_H // 3))
 
         pygame.draw.rect(screen, BLUE, (40, 20, SCREEN_W - 80, 80), border_radius=8)
-        draw_text(screen, 'Criacao de Heroi', 40, 60, 30, color=WHITE)
+        draw_text(screen, 'Criação de Herói', 60, 370, 40, color=WHITE)
 
         name_box_rect = Rect(50, 110, 400, 40)
         pygame.draw.rect(screen, (245,245,245), name_box_rect, border_radius=6)
@@ -368,6 +381,128 @@ def hero_creation_screen(screen):
     return None
 
 
+def character_select_screen(screen):
+    """Simple character select between Miguel and Maria. Returns 'miguel' or 'maria' or None."""
+    clock = pygame.time.Clock()
+
+    def load_idle_frame(character_folder):
+        try:
+            base = os.path.join(os.path.dirname(__file__), 'FramesAnimacoes', character_folder, 'idle')
+            if not os.path.exists(base):
+                base = os.path.join(os.path.dirname(__file__), 'FramesAnimacoes', character_folder)
+            if not os.path.exists(base):
+                return None
+
+            def sort_key(fname):
+                name = os.path.splitext(fname)[0]
+                try:
+                    return int(name)
+                except Exception:
+                    return name.lower()
+
+            files = [f for f in os.listdir(base) if os.path.isfile(os.path.join(base, f)) and f.lower().endswith(('.png', '.jpg', '.jpeg'))]
+            if not files:
+                return None
+            files = sorted(files, key=sort_key)
+            fpath = os.path.join(base, files[0])
+            try:
+                img = pygame.image.load(fpath).convert_alpha()
+                return img
+            except Exception:
+                return None
+        except Exception:
+            return None
+
+
+    mig_pref = os.path.join(os.path.dirname(__file__), 'imagens_game', 'miguel_sembg.png')
+    mar_pref = os.path.join(os.path.dirname(__file__), 'imagens_game', 'Personagem_maria.png')
+
+    mig_img = None
+    mar_img = None
+    try:
+        if os.path.exists(mig_pref):
+            mig_img = pygame.image.load(mig_pref).convert_alpha()
+    except Exception:
+        mig_img = None
+    try:
+        if os.path.exists(mar_pref):
+            mar_img = pygame.image.load(mar_pref).convert_alpha()
+    except Exception:
+        mar_img = None
+
+    if not mig_img:
+        mig_img = load_idle_frame('miguel_oco')
+    if not mar_img:
+        mar_img = load_idle_frame('maria_oco')
+
+    box_w, box_h = 260, 320
+    img_w = box_w - 20
+    img_h = box_h - 80
+    mw = SCREEN_W
+    mh = SCREEN_H
+    btn_miguel = Rect((mw // 2 - box_w - 20, mh // 2 - box_h // 2, box_w, box_h))
+    btn_maria = Rect((mw // 2 + 20, mh // 2 - box_h // 2, box_w, box_h))
+
+    def scale_to_fit(img, target_w, target_h):
+        try:
+            w, h = img.get_width(), img.get_height()
+            if w == 0 or h == 0:
+                return None
+            scale = min(target_w / w, target_h / h)
+            nw = max(1, int(w * scale))
+            nh = max(1, int(h * scale))
+            return pygame.transform.smoothscale(img, (nw, nh))
+        except Exception:
+            return None
+
+    if mig_img:
+        mig_img = scale_to_fit(mig_img, img_w, img_h)
+    if mar_img:
+        mar_img = scale_to_fit(mar_img, img_w, img_h)
+
+    font = pygame.font.SysFont(None, 28)
+
+    while True:
+        clock.tick(FPS)
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                return None
+            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
+                pos = e.pos
+                if btn_miguel.collidepoint(pos):
+                    return 'miguel'
+                if btn_maria.collidepoint(pos):
+                    return 'maria'
+
+        try:
+            bg_path = os.path.join(os.path.dirname(__file__), 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
+            if os.path.exists(bg_path):
+                bg = pygame.image.load(bg_path).convert()
+                bg = pygame.transform.smoothscale(bg, (SCREEN_W, SCREEN_H))
+                screen.blit(bg, (0, 0))
+            else:
+                screen.fill((30, 30, 50))
+        except Exception:
+            screen.fill((30, 30, 50))
+
+        draw_text(screen, 'Escolha o seu personagem', 40, SCREEN_W // 2 - 220, 120, color=WHITE)
+
+        pygame.draw.rect(screen, (70, 70, 70), btn_miguel, border_radius=8)
+        if mig_img:
+            screen.blit(mig_img, (btn_miguel.x + 10, btn_miguel.y + 10))
+        txt = font.render('Miguel', True, WHITE)
+        screen.blit(txt, (btn_miguel.x + (btn_miguel.width - txt.get_width()) // 2, btn_miguel.y + btn_miguel.height - 40))
+
+        pygame.draw.rect(screen, (70, 70, 70), btn_maria, border_radius=8)
+        if mar_img:
+            screen.blit(mar_img, (btn_maria.x + 10, btn_maria.y + 10))
+        txt2 = font.render('Maria', True, WHITE)
+        screen.blit(txt2, (btn_maria.x + (btn_maria.width - txt2.get_width()) // 2, btn_maria.y + btn_maria.height - 40))
+
+        pygame.display.flip()
+
+
+
 def hero_selection_screen(screen):
 
     clock = pygame.time.Clock()
@@ -388,6 +523,11 @@ def hero_selection_screen(screen):
                     if box.collidepoint(pos):
                         try:
                             h = Heroi(nome=data.get('nome',''), vida=data.get('vida',1), defesa=data.get('defesa',1), ataque=data.get('ataque',1), iniciativa=data.get('iniciativa',0), dinheiro_inicial=data.get('dinheiro',10.5), estamina=data.get('estamina',1))
+
+                            try:
+                                setattr(h, 'character', data.get('character', 'miguel'))
+                            except Exception:
+                                pass
                             return h
                         except Exception:
                             continue
@@ -437,6 +577,21 @@ def main():
     select_btn = Button((btn_x, 220 + btn_height + spacing, btn_width, btn_height), 'Selecionar Herói', BLUE)
     exit_btn = Button((btn_x, 220 + 2 * (btn_height + spacing), btn_width, btn_height), 'Sair', RED)
 
+    options_btn_size = 64
+    options_btn_x = SCREEN_W - options_btn_size - 20
+    options_btn_y = 20
+    options_btn_rect = Rect((options_btn_x, options_btn_y, options_btn_size, options_btn_size))
+    options_img = None
+    try:
+        options_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'opção_botão.png')
+        if os.path.exists(options_path):
+            options_img = pygame.image.load(options_path).convert_alpha()
+            options_img = pygame.transform.scale(options_img, (options_btn_size, options_btn_size))
+    except Exception:
+        pass
+
+    current_volume = 0.6
+
     state = 'MENU'
     heroi_obj = None
 
@@ -455,6 +610,21 @@ def main():
                         state = 'SELECT'
                     if exit_btn.is_clicked(pos):
                         running = False
+                    if options_btn_rect.collidepoint(pos):
+                        state = 'OPTIONS'
+                elif state == 'OPTIONS':
+                    volume_bar_left = SCREEN_W // 2 - 150
+                    volume_bar_right = SCREEN_W // 2 + 150
+                    volume_bar_y = SCREEN_H // 2 + 50
+                    
+                    if volume_bar_left <= pos[0] <= volume_bar_right and volume_bar_y - 5 <= pos[1] <= volume_bar_y + 5:
+                        current_volume = (pos[0] - volume_bar_left) / (volume_bar_right - volume_bar_left)
+                        current_volume = max(0.0, min(1.0, current_volume))
+                        pygame.mixer.music.set_volume(current_volume)
+                    
+                    back_btn_rect = Rect((SCREEN_W // 2 - 80, SCREEN_H - 120, 160, 50))
+                    if back_btn_rect.collidepoint(pos):
+                        state = 'MENU'
 
         if state == 'MENU':
             menu_bg = None
@@ -471,11 +641,71 @@ def main():
             else:
                 screen.fill((30, 30, 50))
 
-            draw_text(screen, 'Rural Dungeon', 56, 320, 80, color=WHITE)
+            draw_text(screen, 'Rural Dungeon', 80, 320, 150, color=WHITE)
             mx, my = pygame.mouse.get_pos()
             start_btn.draw(screen, mouse_pos=(mx, my))
             select_btn.draw(screen, mouse_pos=(mx, my))
             exit_btn.draw(screen, mouse_pos=(mx, my))
+            
+            if options_img:
+                if options_btn_rect.collidepoint(mx, my):
+                    highlighted = pygame.Surface((options_btn_size, options_btn_size))
+                    highlighted.fill((255, 255, 255))
+                    highlighted.set_alpha(50)
+                    screen.blit(highlighted, (options_btn_x, options_btn_y))
+                screen.blit(options_img, (options_btn_x, options_btn_y))
+            
+            pygame.display.flip()
+
+        elif state == 'OPTIONS':
+            menu_bg = None
+            try:
+                bg_path = os.path.join(os.path.dirname(__file__), 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
+                if os.path.exists(bg_path):
+                    menu_bg = pygame.image.load(bg_path).convert()
+                    menu_bg = pygame.transform.smoothscale(menu_bg, (SCREEN_W, SCREEN_H))
+            except Exception:
+                menu_bg = None
+
+            if menu_bg:
+                screen.blit(menu_bg, (0, 0))
+            else:
+                screen.fill((30, 30, 50))
+
+            draw_text(screen, 'Opções', 70, 420, 160, color=WHITE)
+            
+            volume_label_y = SCREEN_H // 2
+            draw_text(screen, 'Volume:', 50, 320, volume_label_y - 40, color=WHITE)
+            
+            volume_bar_y = SCREEN_H // 2 + 50
+            volume_bar_left = SCREEN_W // 2 - 150
+            volume_bar_right = SCREEN_W // 2 + 150
+            volume_bar_width = volume_bar_right - volume_bar_left
+            
+            mx, my = pygame.mouse.get_pos()
+            
+            pygame.draw.rect(screen, (50, 50, 50), (volume_bar_left, volume_bar_y - 5, volume_bar_width, 10), border_radius=5)
+            
+            fill_width = volume_bar_width * current_volume
+            pygame.draw.rect(screen, (100, 255, 100), (volume_bar_left, volume_bar_y - 5, fill_width, 10), border_radius=5)
+            
+            volume_percent = int(current_volume * 100)
+            volume_font = pygame.font.SysFont(None, 28)
+            volume_text = volume_font.render(f'{volume_percent}%', True, WHITE)
+            volume_text_rect = volume_text.get_rect(center=(SCREEN_W // 2, volume_bar_y + 40))
+            screen.blit(volume_text, volume_text_rect)
+            
+            back_btn_rect = Rect((SCREEN_W // 2 - 80, SCREEN_H - 120, 160, 50))
+            back_btn_color = GRAY
+            if back_btn_rect.collidepoint(mx, my):
+                back_btn_color = tuple(min(255, c + 30) for c in GRAY)
+            
+            pygame.draw.rect(screen, back_btn_color, back_btn_rect, border_radius=8)
+            back_font = pygame.font.SysFont(None, 28)
+            back_text = back_font.render('Voltar', True, BLACK)
+            back_text_rect = back_text.get_rect(center=back_btn_rect.center)
+            screen.blit(back_text, back_text_rect)
+            
             pygame.display.flip()
 
         elif state == 'HERO':
@@ -487,6 +717,28 @@ def main():
                 save_hero_individual(heroi_obj)
                 Util.certo_txt(f'Herói {heroi_obj.nome} criado e salvo em save_heroi.json e save_personagem.json')
                 Util.pausa(1)
+                try:
+                    choice = character_select_screen(screen)
+                    if choice is None:
+                        state = 'MENU'
+                        continue
+                    setattr(heroi_obj, 'character', choice)
+                    try:
+                        base = os.path.dirname(__file__)
+                        if str(choice).lower() == 'maria':
+                            dialogo_pygame.current_player_img_path = os.path.join(base, 'imagens_game', 'Personagem_maria.png')
+                        else:
+                            dialogo_pygame.current_player_img_path = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+                    except Exception:
+                        pass
+                    try:
+                        save_heroi_to_file(heroi_obj)
+                        save_personagem_file(heroi_obj)
+                        save_hero_individual(heroi_obj)
+                    except Exception:
+                        pass
+                except Exception:
+                    pass
                 try:
                     try:
                         dialogo_pygame.dialogo_terreo()
@@ -515,6 +767,7 @@ def main():
                         
                     elif res == 'quit':
                         state = 'MENU'
+                        pygame.mixer.music.play(-1)
                         continue
 
                     
@@ -534,6 +787,7 @@ def main():
                         
                     elif res2 == 'quit':
                         state = 'MENU'
+                        pygame.mixer.music.play(-1)
                         continue
 
                     
@@ -551,6 +805,7 @@ def main():
                         
                     elif res3 == 'quit':
                         state = 'MENU'
+                        pygame.mixer.music.play(-1)
                         continue
 
                     
@@ -570,6 +825,7 @@ def main():
                     Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
                     Util.pausa(1)
                 state = 'MENU'
+                pygame.mixer.music.play(-1)
 
         elif state == 'SELECT':
             selection = hero_selection_screen(screen)
@@ -578,6 +834,28 @@ def main():
             else:
                 save_personagem_file(selection)
                 save_hero_individual(selection)
+                try:
+                    choice = character_select_screen(screen)
+                    if choice is None:
+                        state = 'MENU'
+                        continue
+                    setattr(selection, 'character', choice)
+                    try:
+                        base = os.path.dirname(__file__)
+                        if str(choice).lower() == 'maria':
+                            dialogo_pygame.current_player_img_path = os.path.join(base, 'imagens_game', 'Personagem_maria.png')
+                        else:
+                            dialogo_pygame.current_player_img_path = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+                    except Exception:
+                        pass
+                    try:
+                        save_heroi_to_file(selection)
+                        save_personagem_file(selection)
+                        save_hero_individual(selection)
+                    except Exception:
+                        pass
+                except Exception:
+                    pass
                 try:
                     try:
                         dialogo_pygame.dialogo_terreo()
@@ -604,6 +882,7 @@ def main():
                             pass
                     elif res == 'quit':
                         state = 'MENU'
+                        pygame.mixer.music.play(-1)
                         continue
 
                     
@@ -622,6 +901,7 @@ def main():
                             pass
                     elif res2 == 'quit':
                         state = 'MENU'
+                        pygame.mixer.music.play(-1)
                         continue
 
                     
@@ -638,6 +918,7 @@ def main():
                             pass
                     elif res3 == 'quit':
                         state = 'MENU'
+                        pygame.mixer.music.play(-1)
                         continue
 
                     
@@ -656,6 +937,7 @@ def main():
                     Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
                     Util.pausa(1)
                 state = 'MENU'
+                pygame.mixer.music.play(-1)
 
     pygame.quit()
 

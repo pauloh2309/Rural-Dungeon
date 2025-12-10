@@ -24,6 +24,17 @@ except:
     FONTE_FALA = pygame.font.SysFont('Arial', 24)
     FONTE_NOME = pygame.font.SysFont('Arial', 20)
 
+current_player_img_path = None
+
+def _get_player_img_path(base):
+    """Return the player image path: module override if set, otherwise default Miguel image."""
+    try:
+        if current_player_img_path:
+            return current_player_img_path
+    except Exception:
+        pass
+    return os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+
 DIALOGO_TERREO_INICIO = (
     ("Player", "Mais um dia de aula. Estou quase terminando o último período, finalmente!!"),
     ("Player", "Falta apenas eu terminar meu TCC."),
@@ -174,7 +185,7 @@ class CaixaDialogo:
         self.player_img = None
         self.npc_img = None
         self.bg_img = None
-        self.npc_context_img = None 
+        self.npc_context_img = None
         
         if player_img_path and os.path.exists(player_img_path):
             try:
@@ -284,7 +295,7 @@ class CaixaDialogo:
             self.indice_fala += 1
             if self.indice_fala >= len(self.dialogo_data):
                 self.dialogo_ativo = False
-                return True 
+                return True
             else:
                 self._resetar_fala()
         else:
@@ -397,7 +408,6 @@ class CaixaDialogo:
 
 
 def run_dialog_scene(dialogo_data, player_img_path=None, npc_img_path=None, bg_img_path=None):
-
     pygame.init()
     try:
         pygame.mixer.init()
@@ -436,11 +446,9 @@ def run_dialog_scene(dialogo_data, player_img_path=None, npc_img_path=None, bg_i
 
 
 def _save_personagem_with_interactions(heroi):
-
     try:
         base_dir = os.path.dirname(__file__)
         path = os.path.join(base_dir, 'save_personagem.json')
-
         data = {}
         if os.path.exists(path):
             try:
@@ -471,7 +479,7 @@ def _save_personagem_with_interactions(heroi):
 
 def dialogo_terreo():
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     npc_img = os.path.join(base, 'Imagens_dialogos', 'npc_sembg.png')
     bg_img = os.path.join(base, 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
     return run_dialog_scene(DIALOGO_TERREO_INICIO, player_img, npc_img, bg_img)
@@ -479,13 +487,12 @@ def dialogo_terreo():
 
 def dialogo_intro_cleyton():
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     bg_img = os.path.join(base, 'Imagens_dialogos', '854d6de6-6b65-4aca-9a57-65ebca4ceffa.jpg')
     return run_dialog_scene(DIALOGO_INTRO_MESTRE, player_img, None, bg_img)
 
 
 def ru_choice_scene(heroi=None):
-
     import random
     base = os.path.dirname(__file__)
     try:
@@ -498,10 +505,8 @@ def ru_choice_scene(heroi=None):
         pygame.display.set_caption('Decisão: RU ou Próximo Nível')
         clock = pygame.time.Clock()
 
-
         music_path = os.path.join(os.path.dirname(base), 'Sons', 'awesomeness.wav')
         if not os.path.exists(music_path):
-
             music_path = os.path.join(base, '..', 'Sons', 'awesomeness.wav')
         try:
             if os.path.exists(music_path):
@@ -510,7 +515,6 @@ def ru_choice_scene(heroi=None):
                 pygame.mixer.music.play(-1)
         except Exception:
             pass
-
 
         font_large = pygame.font.SysFont(None, 36)
         font_small = pygame.font.SysFont(None, 24)
@@ -536,13 +540,11 @@ def ru_choice_scene(heroi=None):
                     if ev.key == pygame.K_ESCAPE:
                         running = False
 
-
             screen.fill(AZUL_ESCURO)
             title_surf = pygame.font.SysFont(None, 36).render('Você encontrou Mestre Cleyton.', True, BRANCO)
             screen.blit(title_surf, (60, 80))
             sub_surf = pygame.font.SysFont(None, 26).render('Deseja ir ao Restaurante Universitário (RU) ou seguir para o próximo nível?', True, BRANCO)
             screen.blit(sub_surf, (60, 140))
-
 
             pygame.draw.rect(screen, (80, 160, 80), btn_ru, border_radius=8)
             pygame.draw.rect(screen, (80, 80, 200), btn_next, border_radius=8)
@@ -554,11 +556,8 @@ def ru_choice_scene(heroi=None):
             pygame.display.flip()
             clock.tick(60)
 
-
         if result['choice'] == 'ru':
-
             player_img = os.path.join(base, 'Imagens_dialogos', '14e0a435-3968-479c-be77-c7ff2173dd36.jpg')
-
             bowser_img = os.path.join(base, 'imagens_game', 'bowser_referencia.png')
             if not os.path.exists(bowser_img):
                 fallback1 = os.path.join(base, 'Imagens_dialogos', '80c5ae94-a3e5-4f61-8bce-44a89eefdbde.jpg')
@@ -661,20 +660,16 @@ def ru_choice_scene(heroi=None):
                     texto_ru = {'texto_chegando_ru': 'Você chega ao RU.' , 'texto_sem_evento': 'Nada de especial.'}
                     prato_aleatorio = 'Você comeu e se sentiu revigorado.'
 
-
                 arrival_dialog = [("System", texto_ru.get('texto_chegando_ru', ''))]
                 run_dialog_scene(arrival_dialog, player_img, None, ru_bg)
 
                 jogador_dinheiro = getattr(heroi, 'dinheiro', 0)
                 if jogador_dinheiro < preco_ru:
-
                     if getattr(heroi, 'encontrou_bowser', 0) == 0:
                         try:
                             from bowser import Bowser as BowserClass
                             b = BowserClass(heroi)
-
                             texto_re = BowserClass.bowser_texto[1].get('re-aparição', '')
-
                             dialog_bowser = []
                             for linha in texto_re.split('\n'):
                                 linha = linha.strip()
@@ -685,16 +680,13 @@ def ru_choice_scene(heroi=None):
                                 elif linha.startswith('Bowser:') or linha.startswith('???'):
                                     dialog_bowser.append(('Bowser', linha.partition(':')[2].strip()))
                                 else:
-
                                     dialog_bowser.append(('System', linha))
                             run_dialog_scene(dialog_bowser, player_img, bowser_img, encontro_bg)
                             res = b.rola_roleta_gui(texto_re)
-
                             try:
                                 setattr(heroi, 'encontrou_bowser', 1)
                             except Exception:
                                 pass
-
                             try:
                                 if not hasattr(heroi, 'interactions') or getattr(heroi, 'interactions') is None:
                                     heroi.interactions = []
@@ -708,7 +700,6 @@ def ru_choice_scene(heroi=None):
                                 })
                             except Exception:
                                 pass
-
                             try:
                                 base_dir = os.path.dirname(__file__)
                                 with open(os.path.join(base_dir, 'save_heroi.json'), 'w', encoding='utf-8') as f:
@@ -716,11 +707,9 @@ def ru_choice_scene(heroi=None):
                             except Exception:
                                 pass
                             _save_personagem_with_interactions(heroi)
-
                             resultado_dialog = [("Bowser", res.get('texto_bowser', '')), ("System", res.get('escolha', {}).get('nome', '')), ("System", res.get('outcome_text', ''))]
                             run_dialog_scene(resultado_dialog, player_img, bowser_img, encontro_bg)
                         except Exception:
-
                             try:
                                 if not hasattr(heroi, 'interactions') or getattr(heroi, 'interactions') is None:
                                     heroi.interactions = []
@@ -736,7 +725,6 @@ def ru_choice_scene(heroi=None):
                                 pass
                             run_dialog_scene([("System", texto_ru.get('texto_sem_evento', ''))], player_img, None, ru_bg)
                     else:
-
                         try:
                             if not hasattr(heroi, 'interactions') or getattr(heroi, 'interactions') is None:
                                 heroi.interactions = []
@@ -752,10 +740,8 @@ def ru_choice_scene(heroi=None):
                             pass
                         run_dialog_scene([("System", texto_ru.get('texto_sem_evento', ''))], player_img, None, ru_bg)
                 else:
-
                     buying = True
                     buy_choice = None
-
                     btn_yes = pygame.Rect(300, 480, 160, 56)
                     btn_no = pygame.Rect(560, 480, 160, 56)
                     while buying:
@@ -780,7 +766,6 @@ def ru_choice_scene(heroi=None):
                         clock.tick(30)
 
                     if buy_choice:
-
                         try:
                             dinheiro_before = getattr(heroi, 'dinheiro', 0)
                             heroi.pagar_ru()
@@ -790,9 +775,7 @@ def ru_choice_scene(heroi=None):
                         dinheiro_after = getattr(heroi, 'dinheiro', 0)
                         heroi.vida = getattr(heroi, 'vidabase', getattr(heroi, 'vida', 1))
                         heroi.estamina = getattr(heroi, 'estaminabase', getattr(heroi, 'estamina', 1))
-
                         run_dialog_scene([("Player", prato_aleatorio)], player_img, None, ru_bg)
-
                         try:
                             if not hasattr(heroi, 'interactions') or getattr(heroi, 'interactions') is None:
                                 heroi.interactions = []
@@ -807,9 +790,7 @@ def ru_choice_scene(heroi=None):
                             })
                         except Exception:
                             pass
-
                         _save_personagem_with_interactions(heroi)
-
                         if getattr(heroi, 'encontrou_bowser', 0) == 1:
                             try:
                                 from bowser import Bowser as BowserClass
@@ -825,11 +806,9 @@ def ru_choice_scene(heroi=None):
                                     elif linha.startswith('Bowser:') or linha.startswith('???'):
                                         dialog_bowser.append(('Bowser', linha.partition(':')[2].strip()))
                                     else:
-
                                         dialog_bowser.append(('System', linha))
                                 run_dialog_scene(dialog_bowser, player_img, bowser_img, encontro_bg)
                                 res = b.rola_roleta_gui(texto_re)
-
                                 try:
                                     if not hasattr(heroi, 'interactions') or getattr(heroi, 'interactions') is None:
                                         heroi.interactions = []
@@ -849,7 +828,6 @@ def ru_choice_scene(heroi=None):
                             except Exception:
                                 pass
 
-
         try:
             pygame.mixer.music.stop()
         except Exception:
@@ -862,69 +840,60 @@ def ru_choice_scene(heroi=None):
 
 
 def dialogo_nivel_1():
-
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     npc_img = os.path.join(base, 'imagens_sem_bg', 'goblin_adm.png')
     return run_dialog_scene(DIALOGO_NIVEL_1_CHEFE, player_img, npc_img)
 
 
 def dialogo_pos_nivel_1():
-
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     bg_img = os.path.join(base, 'Imagens_dialogos', '854d6de6-6b65-4aca-9a57-65ebca4ceffa.jpg')
     return run_dialog_scene(DIALOGO_POS_NIVEL_1, player_img, None, bg_img)
 
 
 def dialogo_nivel_2():
-
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     npc_img = os.path.join(base, 'imagens_sem_bg', 'robo_sustentavel.png')
     return run_dialog_scene(DIALOGO_NIVEL_2_CHEFE, player_img, npc_img)
 
 
 def dialogo_pos_nivel_2():
-
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     bg_img = os.path.join(base, 'Imagens_dialogos', '854d6de6-6b65-4aca-9a57-65ebca4ceffa.jpg')
     return run_dialog_scene(DIALOGO_POS_NIVEL_2, player_img, None, bg_img)
 
 
 def dialogo_nivel_3():
-
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     npc_img = os.path.join(base, 'imagens_sem_bg', 'mago_matematica.png')
     return run_dialog_scene(DIALOGO_NIVEL_3_CHEFE, player_img, npc_img)
 
 
 def dialogo_pos_nivel_3():
-
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     bg_img = os.path.join(base, 'Imagens_dialogos', '854d6de6-6b65-4aca-9a57-65ebca4ceffa.jpg')
     return run_dialog_scene(DIALOGO_POS_NIVEL_3, player_img, None, bg_img)
 
 
 def dialogo_nivel_4():
-
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
+    player_img = _get_player_img_path(base)
     npc_img = os.path.join(base, 'imagens_sem_bg', 'robo_python.png')
     return run_dialog_scene(DIALOGO_NIVEL_4_CHEFE, player_img, npc_img)
 
 
 def dialogo_conclusao():
-
     base = os.path.dirname(__file__)
-    player_img = os.path.join(base, 'Imagens_dialogos', '14e0a435-3968-479c-be77-c7ff2173dd36.jpg')
+    player_img = _get_player_img_path(base)
     bg_img = os.path.join(base, 'Imagens_dialogos', '854d6de6-6b65-4aca-9a57-65ebca4ceffa.jpg')
     return run_dialog_scene(DIALOGO_CONCLUSAO, player_img, None, bg_img)
 
 
 if __name__ == '__main__':
-
     dialogo_terreo()
