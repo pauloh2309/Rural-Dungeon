@@ -49,13 +49,14 @@ current_heroi = None
 
 
 class Fighter:
-    def __init__(self, name, sprite_path, x, y, max_hp, attack):
+    def __init__(self, name, sprite_path, x, y, max_hp, attack, defense=0):
         self.name = name
         self.x = x
         self.y = y
         self.max_hp = max_hp
         self.hp = max_hp
         self.attack_power = attack
+        self.defense = max(0, defense)
         self.special_charge = 0
         self.dead = False
         self.flip_horiz = False
@@ -108,6 +109,9 @@ class Fighter:
         if special:
             dmg = int(dmg * 1.5)
             self.special_charge = 0
+
+        defense_reduction = target.defense * 1.1
+        dmg = max(1, int(dmg - defense_reduction))
 
         target.take_damage(dmg)
         self.special_charge = min(100, self.special_charge + 20)
@@ -185,18 +189,22 @@ def carregar_fase():
         hero_max = getattr(current_heroi, 'vidabase', None)
         hero_current = getattr(current_heroi, 'vida', None)
         hero_atk = getattr(current_heroi, 'ataquebase', getattr(current_heroi, 'ataque', None))
+        hero_def = getattr(current_heroi, 'defesa', None)
         if hero_max is None:
             hero_max = hero_current
         if hero_max is None:
             hero_max = 120
         if hero_atk is None:
             hero_atk = 25
+        if hero_def is None:
+            hero_def = 0
         if hero_current is None:
             hero_current = hero_max
     except Exception:
         hero_max = 120
         hero_current = 120
         hero_atk = 25
+        hero_def = 0
 
     try:
         choice = getattr(current_heroi, 'character', None)
@@ -210,13 +218,13 @@ def carregar_fase():
         player_name = "Miguel"
         sprite_folder = "FramesAnimacoes/miguel_oco"
 
-    player = Fighter(player_name, sprite_folder, 150, 300, hero_max, hero_atk)
+    player = Fighter(player_name, sprite_folder, 150, 300, hero_max, hero_atk, defense=hero_def)
 
     try:
         player.hp = max(0, min(player.max_hp, int(hero_current)))
     except Exception:
         player.hp = player.max_hp
-    enemy = Fighter(nome, f"FramesAnimacoes/{nome}", 650, 300, hp, 18)
+    enemy = Fighter(nome, f"FramesAnimacoes/{nome}", 650, 300, hp, 18, defense=2)
     player.flip_horiz = False
     enemy.flip_horiz = True
     enemy.attack_power = max(1, int(enemy.attack_power * 0.7))

@@ -23,30 +23,6 @@ BLUE = (40, 120, 200)
 import os
 
 BASE_DIR = os.path.dirname(__file__)
-PROGRESS_FILE = 'save_progress.json'
-
-
-def load_progress(path=PROGRESS_FILE):
-    if not os.path.isabs(path):
-        path = os.path.join(BASE_DIR, path)
-    try:
-        if os.path.exists(path):
-            with open(path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-            return int(data.get('fase', 0))
-    except Exception:
-        pass
-    return 0
-
-
-def save_progress(fase, path=PROGRESS_FILE):
-    if not os.path.isabs(path):
-        path = os.path.join(BASE_DIR, path)
-    try:
-        with open(path, 'w', encoding='utf-8') as f:
-            json.dump({'fase': int(max(0, fase))}, f, ensure_ascii=False, indent=2)
-    except Exception:
-        pass
 
 
 def draw_text(surface, text, size, x, y, color=BLACK):
@@ -546,13 +522,13 @@ def character_select_screen(screen):
         pygame.draw.rect(screen, (70, 70, 70), btn_miguel, border_radius=8)
         if mig_img:
             screen.blit(mig_img, (btn_miguel.x + 10, btn_miguel.y + 10))
-        txt = font.render('Miguel', True, WHITE)
+        txt = font.render('Masculino', True, WHITE)
         screen.blit(txt, (btn_miguel.x + (btn_miguel.width - txt.get_width()) // 2, btn_miguel.y + btn_miguel.height - 40))
 
         pygame.draw.rect(screen, (70, 70, 70), btn_maria, border_radius=8)
         if mar_img:
             screen.blit(mar_img, (btn_maria.x + 10, btn_maria.y + 10))
-        txt2 = font.render('Maria', True, WHITE)
+        txt2 = font.render('Feminino', True, WHITE)
         screen.blit(txt2, (btn_maria.x + (btn_maria.width - txt2.get_width()) // 2, btn_maria.y + btn_maria.height - 40))
 
         pygame.display.flip()
@@ -562,67 +538,140 @@ def character_select_screen(screen):
 def hero_selection_screen(screen):
 
     clock = pygame.time.Clock()
-    files = list_saved_heroes()
-    idx = 0
-    offset_y = 140
+    all_files = list_saved_heroes()
+    all_files.reverse()
+    scroll_offset = 0
+    item_height = 84
+    items_per_screen = 6
+    max_scroll = max(0, len(all_files) - items_per_screen)
+    
+    delete_confirm = None
+    delete_timer = 0
+    
     running = True
     while running:
         clock.tick(FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return None
+            elif event.type == pygame.MOUSEWHEEL:
+                if event.y > 0:
+                    scroll_offset = max(0, scroll_offset - 1)
+                else:
+                    scroll_offset = min(max_scroll, scroll_offset + 1)
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = event.pos
-                for i, (path, data) in enumerate(files):
-                    y = offset_y + i * 84
-                    box = Rect(60, y, SCREEN_W - 120, 72)
-                    if box.collidepoint(pos):
-                        try:
-                            h = Heroi(nome=data.get('nome',''), vida=data.get('vida',1), defesa=data.get('defesa',1), ataque=data.get('ataque',1), iniciativa=data.get('iniciativa',0), dinheiro_inicial=data.get('dinheiro',10.5), estamina=data.get('estamina',1))
-
-                            try:
-                                setattr(h, 'character', data.get('character', 'miguel'))
-                            except Exception:
-                                pass
-                            return h
-                        except Exception:
-                            continue
                 
-                if Rect(880, 40, 100, 40).collidepoint(pos):
-                    return None
+                if delete_confirm is not None:
+                    if Rect(300, 400, 200, 50).collidepoint(pos):
+                        try:
+                            os.remove(delete_confirm[0])
+                            all_files = list_saved_heroes()
+                            all_files.reverse()
+                            max_scroll = max(0, len(all_files) - items_per_screen)
+                            scroll_offset = min(scroll_offset, max_scroll)
+                            delete_confirm = None
+                        except Exception:
+                            delete_confirm = None
+                    elif Rect(520, 400, 200, 50).collidepoint(pos):
+                        delete_confirm = None
+                else:
+                    for i in range(items_per_screen):
+                        idx = scroll_offset + i
+                        if idx >= len(all_files):
+                            break
+                        path, data = all_files[idx]
+                        y = 140 + i * item_height
+                        box = Rect(60, y, SCREEN_W - 180, 72)
+                        delete_btn = Rect(SCREEN_W - 100, y + 6, 90, 60)
+                        
+                        if delete_btn.collidepoint(pos):
+                            delete_confirm = (path, data)
+                            break
+                        elif box.collidepoint(pos):
+                            try:
+                                h = Heroi(nome=data.get('nome',''), vida=data.get('vida',1), defesa=data.get('defesa',1), ataque=data.get('ataque',1), iniciativa=data.get('iniciativa',0), dinheiro_inicial=data.get('dinheiro',10.5), estamina=data.get('estamina',1))
+                                try:
+                                    setattr(h, 'character', data.get('character', 'miguel'))
+                                except Exception:
+                                    pass
+                                return h
+                            except Exception:
+                                continue
+                    
+                    if Rect(880, 40, 100, 40).collidepoint(pos):
+                        return None
 
         
         screen.fill((18,18,30))
+        
+        draw_text(screen, 'Selecione um Heroi', 60, 300, 50, color=WHITE)
 
-        for i, (path, data) in enumerate(files):
-            y = offset_y + i * 84
-            box = Rect(60, y, SCREEN_W - 120, 72)
+        for i in range(items_per_screen):
+            idx = scroll_offset + i
+            if idx >= len(all_files):
+                break
+            path, data = all_files[idx]
+            y = 140 + i * item_height
+            box = Rect(60, y, SCREEN_W - 180, 72)
+            delete_btn = Rect(SCREEN_W - 100, y + 6, 90, 60)
+            
             pygame.draw.rect(screen, (40,40,60), box, border_radius=8)
             draw_text(screen, data.get('nome','?'), 28, box.x + 12, box.y + 8, color=WHITE)
             info = f"Vida: {data.get('vida',1)}  Ataque: {data.get('ataque',1)}  Defesa: {data.get('defesa',1)}"
             draw_text(screen, info, 20, box.x + 12, box.y + 38, color=(200,200,200))
+            
+            pygame.draw.rect(screen, RED, delete_btn, border_radius=6)
+            delete_text = pygame.font.SysFont(None, 20).render('Deletar', True, WHITE)
+            screen.blit(delete_text, (delete_btn.x + 8, delete_btn.y + 18))
+        
+        if len(all_files) > items_per_screen:
+            scroll_pct = scroll_offset / max_scroll if max_scroll > 0 else 0
+            scrollbar_y = 140 + scroll_pct * (items_per_screen * item_height - 60)
+            pygame.draw.rect(screen, (100,100,100), (SCREEN_W - 20, 140, 10, items_per_screen * item_height))
+            pygame.draw.rect(screen, (255,255,255), (SCREEN_W - 20, scrollbar_y, 10, 60))
 
         back_btn = Button((880, 40, 100, 40), 'Voltar', RED)
         mx,my = pygame.mouse.get_pos()
         back_btn.draw(screen, mouse_pos=(mx,my))
+        
+        if delete_confirm is not None:
+            modal_w = 520
+            modal_h = 150
+            mx = (SCREEN_W - modal_w) // 2
+            my = (SCREEN_H - modal_h) // 2
+            modal = pygame.Surface((modal_w, modal_h), flags=pygame.SRCALPHA)
+            modal.fill((10, 10, 10, 220))
+            screen.blit(modal, (mx, my))
+            
+            confirm_text = f"Deletar {delete_confirm[1].get('nome', '?')}?"
+            draw_text(screen, confirm_text, 28, mx + 40, my + 20, color=WHITE)
+            
+            btn_yes = Rect(300, 400, 200, 50)
+            btn_no = Rect(520, 400, 200, 50)
+            
+            pygame.draw.rect(screen, (200, 50, 50), btn_yes, border_radius=6)
+            pygame.draw.rect(screen, (50, 50, 200), btn_no, border_radius=6)
+            
+            draw_text(screen, 'Sim, Deletar', 22, btn_yes.x + 30, btn_yes.y + 12, color=WHITE)
+            draw_text(screen, 'Nao, Voltar', 22, btn_no.x + 35, btn_no.y + 12, color=WHITE)
 
         pygame.display.flip()
 
     return None
 
 
-def run_campaign(heroi_obj, start_fase=0):
+def run_campaign(heroi_obj):
     try:
-        if start_fase == 0:
-            try:
-                dialogo_pygame.dialogo_terreo()
-            except Exception:
-                pass
-            try:
-                dialogo_pygame.dialogo_intro_cleyton()
-            except Exception:
-                Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
-                Util.pausa(1)
+        try:
+            dialogo_pygame.dialogo_terreo()
+        except Exception:
+            pass
+        try:
+            dialogo_pygame.dialogo_intro_cleyton()
+        except Exception:
+            Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
+            Util.pausa(1)
 
         levels = [
             (0, getattr(dialogo_pygame, 'dialogo_nivel_1', None), getattr(dialogo_pygame, 'dialogo_pos_nivel_1', None)),
@@ -632,27 +681,20 @@ def run_campaign(heroi_obj, start_fase=0):
         ]
 
         for fase_idx, pre_dialog, post_dialog in levels:
-            if fase_idx < start_fase:
-                continue
-
             if callable(pre_dialog):
                 try:
                     pre_dialog()
                 except Exception:
                     pass
 
-            save_progress(fase_idx)
             res = main_battle.run_battle(start_fase=fase_idx, heroi=heroi_obj)
 
             if res == 'victory':
-                save_progress(main_battle.fase)
                 if callable(post_dialog):
                     try:
                         post_dialog()
                     except Exception:
                         pass
-                if fase_idx == levels[-1][0]:
-                    save_progress(0)
             elif res == 'quit':
                 return 'quit'
     except Exception:
@@ -821,16 +863,13 @@ def main():
             if heroi_obj is None:
                 state = 'MENU'
             else:
-                save_personagem_file(heroi_obj)
-                save_hero_individual(heroi_obj)
-                Util.certo_txt(f'Herói {heroi_obj.nome} criado e salvo em save_heroi.json e save_personagem.json')
-                Util.pausa(1)
                 try:
                     choice = character_select_screen(screen)
                     if choice is None:
                         state = 'MENU'
                         continue
                     setattr(heroi_obj, 'character', choice)
+                    dialogo_pygame.current_player_name = heroi_obj.nome
                     try:
                         base = os.path.dirname(__file__)
                         if str(choice).lower() == 'maria':
@@ -839,11 +878,15 @@ def main():
                             dialogo_pygame.current_player_img_path = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
                     except Exception:
                         pass
-                    save_all_hero_files(heroi_obj)
+                    if save_all_hero_files(heroi_obj):
+                        Util.certo_txt(f'Heroi {heroi_obj.nome} salvo com sucesso em heroes!')
+                        Util.pausa(0.5)
+                    else:
+                        Util.certo_txt('Aviso: erro ao salvar heroi. Continuando...')
+                        Util.pausa(0.5)
                 except Exception:
                     pass
-                save_progress(0)
-                res = run_campaign(heroi_obj, start_fase=0)
+                res = run_campaign(heroi_obj)
                 state = 'MENU'
                 play_menu_music()
                 if res == 'quit':
@@ -854,14 +897,13 @@ def main():
             if selection is None:
                 state = 'MENU'
             else:
-                save_personagem_file(selection)
-                save_hero_individual(selection)
                 try:
                     choice = character_select_screen(screen)
                     if choice is None:
                         state = 'MENU'
                         continue
                     setattr(selection, 'character', choice)
+                    dialogo_pygame.current_player_name = selection.nome
                     try:
                         base = os.path.dirname(__file__)
                         if str(choice).lower() == 'maria':
@@ -870,11 +912,15 @@ def main():
                             dialogo_pygame.current_player_img_path = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
                     except Exception:
                         pass
-                    save_all_hero_files(selection)
+                    if save_all_hero_files(selection):
+                        Util.certo_txt(f'Heroi {selection.nome} atualizado com sucesso!')
+                        Util.pausa(0.5)
+                    else:
+                        Util.certo_txt('Aviso: erro ao salvar heroi. Continuando...')
+                        Util.pausa(0.5)
                 except Exception:
                     pass
-                start_fase = load_progress()
-                res = run_campaign(selection, start_fase=start_fase)
+                res = run_campaign(selection)
                 state = 'MENU'
                 play_menu_music()
                 if res == 'quit':

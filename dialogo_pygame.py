@@ -25,6 +25,7 @@ except:
     FONTE_NOME = pygame.font.SysFont('Arial', 20)
 
 current_player_img_path = None
+current_player_name = "Player"
 
 def _get_player_img_path(base):
     try:
@@ -160,6 +161,17 @@ DIALOGO_RU_SEM_EVENTO = (
 DIALOGO_FIM = (
     ("FIM", "Diálogo concluído. Pressione [ESPAÇO] para reiniciar ou [ESC] para sair."),
 )
+
+
+def _replace_player_name(dialogo_data):
+    """Substitui 'Player' pelo nome atual do personagem em um diálogo."""
+    resultado = []
+    for speaker, text in dialogo_data:
+        if speaker == "Player":
+            resultado.append((current_player_name, text))
+        else:
+            resultado.append((speaker, text))
+    return tuple(resultado)
 
 
 class CaixaDialogo:
@@ -343,7 +355,7 @@ class CaixaDialogo:
                 self.tela.fill(AZUL_ESCURO)
         
 
-        if speaker_name == "Player" and self.player_img:
+        if speaker_name == current_player_name and self.player_img:
             pos_x = TELA_LARGURA - self.player_img.get_width() - 30
             pos_y = TELA_ALTURA - self.player_img.get_height() - self.altura_caixa - 20
             self.tela.blit(self.player_img, (pos_x, pos_y))
@@ -351,15 +363,11 @@ class CaixaDialogo:
             pos_x = 30
             pos_y = TELA_ALTURA - self.cleyton_img.get_height() - self.altura_caixa - 20
             self.tela.blit(self.cleyton_img, (pos_x, pos_y))
-        elif 'miguel' in speaker_name.lower() and getattr(self, 'miguel_img', None):
-            pos_x = 30
-            pos_y = TELA_ALTURA - self.miguel_img.get_height() - self.altura_caixa - 20
-            self.tela.blit(self.miguel_img, (pos_x, pos_y))
         elif speaker_name == 'Bowser' and self.npc_img:
             pos_x = 30
             pos_y = TELA_ALTURA - self.npc_img.get_height() - self.altura_caixa - 20
             self.tela.blit(self.npc_img, (pos_x, pos_y))
-        elif speaker_name != "Player" and self.npc_img:
+        elif speaker_name != current_player_name and self.npc_img:
             pos_x = 30
             pos_y = TELA_ALTURA - self.npc_img.get_height() - self.altura_caixa - 20
             self.tela.blit(self.npc_img, (pos_x, pos_y))
@@ -417,7 +425,8 @@ def run_dialog_scene(dialogo_data, player_img_path=None, npc_img_path=None, bg_i
     pygame.display.set_caption("CEAGRI: O Portal do Jubilamento - Diálogo")
     clock = pygame.time.Clock()
     
-    caixa = CaixaDialogo(dialogo_data, screen, player_img_path, npc_img_path, bg_img_path)
+    dialogo_processado = _replace_player_name(dialogo_data)
+    caixa = CaixaDialogo(dialogo_processado, screen, player_img_path, npc_img_path, bg_img_path)
     caixa.iniciar_dialogo()
     
     running = True
