@@ -23,6 +23,28 @@ BLUE = (40, 120, 200)
 import os
 
 BASE_DIR = os.path.dirname(__file__)
+VOLUME_FILE = os.path.join(BASE_DIR, 'volume_config.json')
+
+
+def load_volume():
+    """Carrega o volume salvo ou retorna 0.6 como padrão."""
+    try:
+        if os.path.exists(VOLUME_FILE):
+            with open(VOLUME_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return max(0.0, min(1.0, float(data.get('volume', 0.6))))
+    except Exception:
+        pass
+    return 0.6
+
+
+def save_volume(volume):
+    """Salva o volume atual."""
+    try:
+        with open(VOLUME_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'volume': max(0.0, min(1.0, volume))}, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
 
 
 def draw_text(surface, text, size, x, y, color=BLACK):
@@ -709,13 +731,14 @@ def main():
     pygame.init()
     try:
         pygame.mixer.init()
+        current_game_volume = load_volume()
         music_path = os.path.join(os.path.dirname(__file__), 'Sons', 'awesomeness.wav')
         if os.path.exists(music_path):
             pygame.mixer.music.load(music_path)
-            pygame.mixer.music.set_volume(0.6)
+            pygame.mixer.music.set_volume(current_game_volume)
             pygame.mixer.music.play(-1)
     except Exception:
-        pass
+        current_game_volume = 0.6
     screen = pygame.display.set_mode((SCREEN_W, SCREEN_H))
     pygame.display.set_caption('Rural Dungeon - Menu')
     clock = pygame.time.Clock()
@@ -740,7 +763,7 @@ def main():
     except Exception:
         pass
 
-    current_volume = 0.6
+    current_volume = load_volume()
 
     state = 'MENU'
     heroi_obj = None
@@ -753,6 +776,20 @@ def main():
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = event.pos
+                
+                # Controle de volume em qualquer estado (exceto OPTIONS)
+                if state != 'OPTIONS':
+                    volume_bar_x = SCREEN_W - 200
+                    volume_bar_y = 80
+                    volume_bar_width = 150
+                    
+                    if (volume_bar_x <= pos[0] <= volume_bar_x + volume_bar_width and 
+                        volume_bar_y - 10 <= pos[1] <= volume_bar_y + 20):
+                        current_volume = (pos[0] - volume_bar_x) / volume_bar_width
+                        current_volume = max(0.0, min(1.0, current_volume))
+                        pygame.mixer.music.set_volume(current_volume)
+                        save_volume(current_volume)
+                
                 if state == 'MENU':
                     if start_btn.is_clicked(pos):
                         state = 'HERO'
@@ -771,10 +808,12 @@ def main():
                         current_volume = (pos[0] - volume_bar_left) / (volume_bar_right - volume_bar_left)
                         current_volume = max(0.0, min(1.0, current_volume))
                         pygame.mixer.music.set_volume(current_volume)
+                        save_volume(current_volume)
                     
                     back_btn_rect = Rect((SCREEN_W // 2 - 80, SCREEN_H - 120, 160, 50))
                     if back_btn_rect.collidepoint(pos):
                         state = 'MENU'
+                        save_volume(current_volume)
 
         if state == 'MENU':
             menu_bg = None
@@ -804,6 +843,19 @@ def main():
                     highlighted.set_alpha(50)
                     screen.blit(highlighted, (options_btn_x, options_btn_y))
                 screen.blit(options_img, (options_btn_x, options_btn_y))
+            
+            # Desenhar barra de volume no MENU
+            volume_bar_x = SCREEN_W - 200
+            volume_bar_y = 80
+            volume_bar_width = 150
+            
+            pygame.draw.rect(screen, (50, 50, 50), (volume_bar_x, volume_bar_y, volume_bar_width, 10), border_radius=5)
+            fill_width = volume_bar_width * current_volume
+            pygame.draw.rect(screen, (100, 255, 100), (volume_bar_x, volume_bar_y, fill_width, 10), border_radius=5)
+            
+            vol_font = pygame.font.SysFont(None, 16)
+            vol_text = vol_font.render(f'{int(current_volume * 100)}%', True, WHITE)
+            screen.blit(vol_text, (volume_bar_x - 30, volume_bar_y - 5))
             
             pygame.display.flip()
 

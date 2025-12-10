@@ -1,8 +1,33 @@
 import pygame
 import os
 import sys
+import json
 
 WIDTH, HEIGHT = 1024, 720
+
+BASE_DIR = os.path.dirname(__file__)
+VOLUME_FILE = os.path.join(BASE_DIR, 'volume_config.json')
+
+def load_volume():
+    """Carrega o volume salvo ou retorna 0.6 como padrão."""
+    try:
+        if os.path.exists(VOLUME_FILE):
+            with open(VOLUME_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return max(0.0, min(1.0, float(data.get('volume', 0.6))))
+    except Exception:
+        pass
+    return 0.6
+
+def save_volume(volume):
+    """Salva o volume atual."""
+    try:
+        with open(VOLUME_FILE, 'w', encoding='utf-8') as f:
+            json.dump({'volume': max(0.0, min(1.0, volume))}, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
+current_game_volume = 0.6
 
 
 
@@ -110,7 +135,7 @@ class Fighter:
             dmg = int(dmg * 1.5)
             self.special_charge = 0
 
-        defense_reduction = target.defense * 1.1
+        defense_reduction = target.defense * 0.03
         dmg = max(1, int(dmg - defense_reduction))
 
         target.take_damage(dmg)
@@ -224,7 +249,11 @@ def carregar_fase():
         player.hp = max(0, min(player.max_hp, int(hero_current)))
     except Exception:
         player.hp = player.max_hp
-    enemy = Fighter(nome, f"FramesAnimacoes/{nome}", 650, 300, hp, 18, defense=2)
+    
+    defesa_inimigo_map = {0: 0, 1: 1, 2: 2, 3: 3}
+    defesa_inimigo = defesa_inimigo_map.get(fase, 0)
+    
+    enemy = Fighter(nome, f"FramesAnimacoes/{nome}", 650, 300, hp, 18, defense=defesa_inimigo)
     player.flip_horiz = False
     enemy.flip_horiz = True
     enemy.attack_power = max(1, int(enemy.attack_power * 0.7))
@@ -399,7 +428,7 @@ def pause_menu():
 
 def run_battle(start_fase=0, heroi=None):
     global sounds, music, mixer, screen, clock, background, player, enemy, fase
-    global current_heroi
+    global current_heroi, current_game_volume
     current_heroi = heroi
 
     pygame.init()
@@ -412,6 +441,11 @@ def run_battle(start_fase=0, heroi=None):
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Rural Dungeon - Batalha")
     clock = pygame.time.Clock()
+
+    # Carregar volume salvo
+    current_game_volume = load_volume()
+    if mixer.music.get_busy():
+        mixer.music.set_volume(current_game_volume)
 
     if not sounds:
         try:
@@ -431,6 +465,16 @@ def run_battle(start_fase=0, heroi=None):
             trufa_icon = pygame.transform.scale(trufa_icon, (32, 32))
     except Exception:
         trufa_icon = None
+
+    # Carregar ícone de volume
+    volume_icon = None
+    try:
+        volume_icon_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'opção_botão.png')
+        if os.path.exists(volume_icon_path):
+            volume_icon = pygame.image.load(volume_icon_path).convert_alpha()
+            volume_icon = pygame.transform.scale(volume_icon, (40, 40))
+    except Exception:
+        pass
 
     btn_attack = Button("ATACAR", 50, 620)
     btn_special = Button("ESPECIAL", 350, 620)
@@ -473,6 +517,35 @@ def run_battle(start_fase=0, heroi=None):
         btn_special.draw(screen)
         btn_trufa.draw(screen)
 
+        # Desenhar ícone de volume e controle
+        volume_icon_rect = None
+        if volume_icon:
+            volume_icon_x = WIDTH - 60
+            volume_icon_y = 20
+            screen.blit(volume_icon, (volume_icon_x, volume_icon_y))
+            volume_icon_rect = pygame.Rect(volume_icon_x, volume_icon_y, 40, 40)
+        
+        # Desenhar barra de volume quando houver clique próximo do ícone
+        mouse_pos = pygame.mouse.get_pos()
+        showing_volume = volume_icon_rect and volume_icon_rect.collidepoint(mouse_pos) if volume_icon_rect else False
+        
+        if showing_volume or True:  # Sempre mostrar a barra
+            volume_bar_x = WIDTH - 200
+            volume_bar_y = 25
+            volume_bar_width = 150
+            
+            # Desenhar fundo da barra
+            pygame.draw.rect(screen, (50, 50, 50), (volume_bar_x, volume_bar_y, volume_bar_width, 10), border_radius=5)
+            
+            # Desenhar barra preenchida
+            fill_width = volume_bar_width * current_game_volume
+            pygame.draw.rect(screen, (100, 255, 100), (volume_bar_x, volume_bar_y, fill_width, 10), border_radius=5)
+            
+            # Percentual de volume
+            vol_font = pygame.font.SysFont(None, 16)
+            vol_text = vol_font.render(f'{int(current_game_volume * 100)}%', True, (255, 255, 255))
+            screen.blit(vol_text, (volume_bar_x - 30, volume_bar_y - 5))
+        
         player.update()
         enemy.update()
         player.draw(screen)
@@ -487,36 +560,52 @@ def run_battle(start_fase=0, heroi=None):
                 if res == 'quit':
                     return 'quit'
 
-            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1 and turno_jogador:
+            if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 pos = e.pos
-
-                if btn_attack.clicked(pos):
-                    player.attack(enemy)
-                    turno_jogador = False
-                    esperando = True
-                    delay = pygame.time.get_ticks()
-
-                if btn_trufa.clicked(pos):
-                    if getattr(player, 'trufas_used', 0) < 5:
-                        player.heal(30)
-                        player.special_charge = min(100, player.special_charge + 20)
-                        player.trufas_used += 1
+                
+                # Controle de volume
+                volume_bar_x = WIDTH - 200
+                volume_bar_y = 25
+                volume_bar_width = 150
+                
+                if (volume_bar_x <= pos[0] <= volume_bar_x + volume_bar_width and 
+                    volume_bar_y - 5 <= pos[1] <= volume_bar_y + 15):
+                    current_game_volume = (pos[0] - volume_bar_x) / volume_bar_width
+                    current_game_volume = max(0.0, min(1.0, current_game_volume))
+                    mixer.music.set_volume(current_game_volume)
+                    # Ajustar som dos efeitos também
+                    for sound in sounds.values():
+                        if isinstance(sound, pygame.mixer.Sound):
+                            sound.set_volume(current_game_volume)
+                    save_volume(current_game_volume)
+                elif turno_jogador:
+                    if btn_attack.clicked(pos):
+                        player.attack(enemy)
                         turno_jogador = False
                         esperando = True
                         delay = pygame.time.get_ticks()
-                        if 'cura_trufa' in sounds:
-                            try:
-                                sounds['cura_trufa'].play()
-                            except Exception as exc:
-                                print(f"Erro ao tocar cura_trufa: {exc}")
-                    else:
-                        print("Sem trufas restantes nesta luta.")
 
-                if btn_special.clicked(pos) and player.special_charge == 100:
-                    player.attack(enemy, special=True)
-                    turno_jogador = False
-                    esperando = True
-                    delay = pygame.time.get_ticks()
+                    if btn_trufa.clicked(pos):
+                        if getattr(player, 'trufas_used', 0) < 5:
+                            player.heal(30)
+                            player.special_charge = min(100, player.special_charge + 20)
+                            player.trufas_used += 1
+                            turno_jogador = False
+                            esperando = True
+                            delay = pygame.time.get_ticks()
+                            if 'cura_trufa' in sounds:
+                                try:
+                                    sounds['cura_trufa'].play()
+                                except Exception as exc:
+                                    print(f"Erro ao tocar cura_trufa: {exc}")
+                        else:
+                            print("Sem trufas restantes nesta luta.")
+
+                    if btn_special.clicked(pos) and player.special_charge == 100:
+                        player.attack(enemy, special=True)
+                        turno_jogador = False
+                        esperando = True
+                        delay = pygame.time.get_ticks()
 
         if esperando and pygame.time.get_ticks() - delay > 700:
             esperando = False

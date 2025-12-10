@@ -1,7 +1,7 @@
 {
-  "nome": "Fepe",
-  "vida": 40,
-  "defesa": 30,
+  "nome": "mds",
+  "vida": 30,
+  "defesa": 40,
   "ataque": 50,
   "dinheiro": 10.5,
   "encontrou_bowser": 0,
