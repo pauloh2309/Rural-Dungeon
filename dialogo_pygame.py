@@ -27,7 +27,6 @@ except:
 current_player_img_path = None
 
 def _get_player_img_path(base):
-    """Return the player image path: module override if set, otherwise default Miguel image."""
     try:
         if current_player_img_path:
             return current_player_img_path

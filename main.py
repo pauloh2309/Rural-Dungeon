@@ -67,7 +67,6 @@ def save_heroi_to_file(heroi, path='save_heroi.json'):
         'nivel': getattr(heroi, 'nivel', 1),
         'xp': getattr(heroi, 'xp', 0)
     }
-    # Persist character choice if present
     try:
         data['character'] = getattr(heroi, 'character', 'miguel')
     except Exception:
@@ -123,7 +122,6 @@ def save_hero_individual(heroi, folder='heroes'):
 
 
 def play_menu_music():
-    """Carrega e toca a música do menu"""
     try:
         music_path = os.path.join(os.path.dirname(__file__), 'Sons', 'awesomeness.wav')
         if os.path.exists(music_path):
@@ -395,7 +393,6 @@ def hero_creation_screen(screen):
 
 
 def character_select_screen(screen):
-    """Simple character select between Miguel and Maria. Returns 'miguel' or 'maria' or None."""
     clock = pygame.time.Clock()
 
     def load_idle_frame(character_folder):
