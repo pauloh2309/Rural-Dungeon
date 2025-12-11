@@ -22,6 +22,32 @@ BLUE = (40, 120, 200)
 
 import os
 
+BASE_DIR = os.path.dirname(__file__)
+PROGRESS_FILE = 'save_progress.json'
+
+
+def load_progress(path=PROGRESS_FILE):
+    if not os.path.isabs(path):
+        path = os.path.join(BASE_DIR, path)
+    try:
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return int(data.get('fase', 0))
+    except Exception:
+        pass
+    return 0
+
+
+def save_progress(fase, path=PROGRESS_FILE):
+    if not os.path.isabs(path):
+        path = os.path.join(BASE_DIR, path)
+    try:
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump({'fase': int(max(0, fase))}, f, ensure_ascii=False, indent=2)
+    except Exception:
+        pass
+
 
 def draw_text(surface, text, size, x, y, color=BLACK):
     font = pygame.font.SysFont(None, size)
@@ -58,6 +84,8 @@ class Button:
 
 
 def save_heroi_to_file(heroi, path='save_heroi.json'):
+    if not os.path.isabs(path):
+        path = os.path.join(BASE_DIR, path)
     data = {
         'nome': heroi.nome,
         'vida': heroi.vida,
@@ -76,6 +104,8 @@ def save_heroi_to_file(heroi, path='save_heroi.json'):
 
 
 def save_personagem_file(heroi, path='save_personagem.json'):
+    if not os.path.isabs(path):
+        path = os.path.join(BASE_DIR, path)
     data = {
         'nome': heroi.nome,
         'vida': heroi.vida,
@@ -94,6 +124,8 @@ def save_personagem_file(heroi, path='save_personagem.json'):
 
 
 def save_hero_individual(heroi, folder='heroes'):
+    if not os.path.isabs(folder):
+        folder = os.path.join(BASE_DIR, folder)
 
     try:
         os.makedirs(folder, exist_ok=True)
@@ -121,6 +153,17 @@ def save_hero_individual(heroi, folder='heroes'):
         return None
 
 
+def save_all_hero_files(heroi):
+    """Persist hero data to all save files and return True on success."""
+    try:
+        save_heroi_to_file(heroi)
+        save_personagem_file(heroi)
+        saved_path = save_hero_individual(heroi)
+        return saved_path is not None
+    except Exception:
+        return False
+
+
 def play_menu_music():
     try:
         music_path = os.path.join(os.path.dirname(__file__), 'Sons', 'awesomeness.wav')
@@ -134,6 +177,9 @@ def play_menu_music():
 
 
 def list_saved_heroes(folder='heroes'):
+
+    if not os.path.isabs(folder):
+        folder = os.path.join(BASE_DIR, folder)
 
     res = []
     if not os.path.exists(folder):
@@ -565,6 +611,58 @@ def hero_selection_screen(screen):
     return None
 
 
+def run_campaign(heroi_obj, start_fase=0):
+    try:
+        if start_fase == 0:
+            try:
+                dialogo_pygame.dialogo_terreo()
+            except Exception:
+                pass
+            try:
+                dialogo_pygame.dialogo_intro_cleyton()
+            except Exception:
+                Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
+                Util.pausa(1)
+
+        levels = [
+            (0, getattr(dialogo_pygame, 'dialogo_nivel_1', None), getattr(dialogo_pygame, 'dialogo_pos_nivel_1', None)),
+            (1, getattr(dialogo_pygame, 'dialogo_nivel_2', None), getattr(dialogo_pygame, 'dialogo_pos_nivel_2', None)),
+            (2, getattr(dialogo_pygame, 'dialogo_nivel_3', None), getattr(dialogo_pygame, 'dialogo_pos_nivel_3', None)),
+            (3, getattr(dialogo_pygame, 'dialogo_nivel_4', None), getattr(dialogo_pygame, 'dialogo_conclusao', None)),
+        ]
+
+        for fase_idx, pre_dialog, post_dialog in levels:
+            if fase_idx < start_fase:
+                continue
+
+            if callable(pre_dialog):
+                try:
+                    pre_dialog()
+                except Exception:
+                    pass
+
+            save_progress(fase_idx)
+            res = main_battle.run_battle(start_fase=fase_idx, heroi=heroi_obj)
+
+            if res == 'victory':
+                save_progress(main_battle.fase)
+                if callable(post_dialog):
+                    try:
+                        post_dialog()
+                    except Exception:
+                        pass
+                if fase_idx == levels[-1][0]:
+                    save_progress(0)
+            elif res == 'quit':
+                return 'quit'
+    except Exception:
+        Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
+        Util.pausa(1)
+        return 'quit'
+
+    return 'done'
+
+
 def main():
     pygame.init()
     try:
@@ -741,101 +839,15 @@ def main():
                             dialogo_pygame.current_player_img_path = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
                     except Exception:
                         pass
-                    try:
-                        save_heroi_to_file(heroi_obj)
-                        save_personagem_file(heroi_obj)
-                        save_hero_individual(heroi_obj)
-                    except Exception:
-                        pass
+                    save_all_hero_files(heroi_obj)
                 except Exception:
                     pass
-                try:
-                    try:
-                        dialogo_pygame.dialogo_terreo()
-                    except Exception:
-                        pass
-
-                    try:
-                        dialogo_pygame.dialogo_intro_cleyton()
-                    except Exception:
-                        Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
-                        Util.pausa(1)
-                    
-
-                    
-                    try:
-                        dialogo_pygame.dialogo_nivel_1()
-                    except Exception:
-                        pass
-
-                    res3 = main_battle.run_battle(start_fase=2, heroi=heroi_obj)
-                    if res3 == 'victory':
-                        try:
-                            dialogo_pygame.dialogo_pos_nivel_3()
-                        except Exception:
-                            pass
-                        
-                    elif res3 == 'quit':
-                        state = 'MENU'
-                        play_menu_music()
-                        continue
-
-                    
-                    try:
-                        dialogo_pygame.dialogo_nivel_2()
-                    except Exception:
-                        pass
-
-                    
-
-                    res2 = main_battle.run_battle(start_fase=1, heroi=heroi_obj)
-                    if res2 == 'victory':
-                        try:
-                            dialogo_pygame.dialogo_pos_nivel_2()
-                        except Exception:
-                            pass
-                        
-                    elif res2 == 'quit':
-                        state = 'MENU'
-                        play_menu_music()
-                        continue
-
-                    
-                    try:
-                        dialogo_pygame.dialogo_nivel_3()
-                    except Exception:
-                        pass
-
-                    res3 = main_battle.run_battle(start_fase=2, heroi=heroi_obj)
-                    if res3 == 'victory':
-                        try:
-                            dialogo_pygame.dialogo_pos_nivel_3()
-                        except Exception:
-                            pass
-                        
-                    elif res3 == 'quit':
-                        state = 'MENU'
-                        play_menu_music()
-                        continue
-
-                    
-                    try:
-                        dialogo_pygame.dialogo_nivel_4()
-                    except Exception:
-                        pass
-
-                    res4 = main_battle.run_battle(start_fase=3, heroi=heroi_obj)
-                    if res4 == 'victory':
-                        try:
-                            dialogo_pygame.dialogo_conclusao()
-                        except Exception:
-                            pass
-                    state = 'MENU'
-                except Exception:
-                    Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
-                    Util.pausa(1)
+                save_progress(0)
+                res = run_campaign(heroi_obj, start_fase=0)
                 state = 'MENU'
                 play_menu_music()
+                if res == 'quit':
+                    continue
 
         elif state == 'SELECT':
             selection = hero_selection_screen(screen)
@@ -858,96 +870,15 @@ def main():
                             dialogo_pygame.current_player_img_path = os.path.join(base, 'imagens_game', 'miguel_sembg.png')
                     except Exception:
                         pass
-                    try:
-                        save_heroi_to_file(selection)
-                        save_personagem_file(selection)
-                        save_hero_individual(selection)
-                    except Exception:
-                        pass
+                    save_all_hero_files(selection)
                 except Exception:
                     pass
-                try:
-                    try:
-                        dialogo_pygame.dialogo_terreo()
-                    except Exception:
-                        pass
-
-                    try:
-                        dialogo_pygame.dialogo_intro_cleyton()
-                    except Exception:
-                        Util.certo_txt('Erro ao iniciar cena de diálogo do Mestre Cleyton.')
-                        Util.pausa(1)
-
-                    
-                    try:
-                        dialogo_pygame.dialogo_nivel_1()
-                    except Exception:
-                        pass
-
-                    res = main_battle.run_battle(start_fase=0, heroi=selection)
-                    if res == 'victory':
-                        try:
-                            dialogo_pygame.dialogo_pos_nivel_1()
-                        except Exception:
-                            pass
-                    elif res == 'quit':
-                        state = 'MENU'
-                        play_menu_music()
-                        continue
-
-                    
-                    try:
-                        dialogo_pygame.dialogo_nivel_2()
-                    except Exception:
-                        pass
-
-                    
-
-                    res2 = main_battle.run_battle(start_fase=1, heroi=selection)
-                    if res2 == 'victory':
-                        try:
-                            dialogo_pygame.dialogo_pos_nivel_2()
-                        except Exception:
-                            pass
-                    elif res2 == 'quit':
-                        state = 'MENU'
-                        play_menu_music()
-                        continue
-
-                    
-                    try:
-                        dialogo_pygame.dialogo_nivel_3()
-                    except Exception:
-                        pass
-
-                    res3 = main_battle.run_battle(start_fase=2, heroi=selection)
-                    if res3 == 'victory':
-                        try:
-                            dialogo_pygame.dialogo_pos_nivel_3()
-                        except Exception:
-                            pass
-                    elif res3 == 'quit':
-                        state = 'MENU'
-                        play_menu_music()
-                        continue
-
-                    
-                    try:
-                        dialogo_pygame.dialogo_nivel_4()
-                    except Exception:
-                        pass
-
-                    res4 = main_battle.run_battle(start_fase=3, heroi=selection)
-                    if res4 == 'victory':
-                        try:
-                            dialogo_pygame.dialogo_conclusao()
-                        except Exception:
-                            pass
-                except Exception:
-                    Util.certo_txt('Erro ao executar sequência de diálogos e batalhas. Retornando ao menu.')
-                    Util.pausa(1)
+                start_fase = load_progress()
+                res = run_campaign(selection, start_fase=start_fase)
                 state = 'MENU'
                 play_menu_music()
+                if res == 'quit':
+                    continue
 
     pygame.quit()
 
