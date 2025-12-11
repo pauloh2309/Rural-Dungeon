@@ -1,9 +1,17 @@
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 BOSSES_DATA = {
     "Administracao": {
         "nome": "Goblin da Administração",
         "bg_image": "imagens_game/corredor_administracao.png", 
         "sprite_enemy": "imagens_boss/goblin_admin.png",       
+<<<<<<< Updated upstream
         "sprite_hero": "imagens_heroi/hero_parado.png",       
+=======
+        "sprite_hero": "imagens_heroi/hero_parado.png",        
+>>>>>>> Stashed changes
         "stats": (150, 20, 10, 5, 0), 
         "dialogue": [
             {"speaker": "Goblin da Administração", "text": "HAH! Mais um calouro perdido na burocracia eterna! Ou seria um quase-formando? Não importa! Todos se submeterão à Ordem dos Formulários Indefinidos!"},
@@ -20,7 +28,11 @@ BOSSES_DATA = {
         "nome": "Robô Natureza",
         "bg_image": "imagens_game/corredor_sustentabilidade.png", 
         "sprite_enemy": "imagens_boss/robo_natureza.png",        
+<<<<<<< Updated upstream
         "sprite_hero": "imagens_heroi/hero_parado.png",        
+=======
+        "sprite_hero": "imagens_heroi/hero_parado.png",         
+>>>>>>> Stashed changes
         "stats": (200, 25, 15, 4, 0),
         "dialogue": [
             {"speaker": "Robô Natureza", "text": "Invasor. Seu carbono footprint está muito alto. Você é uma ameaça ao equilíbrio do ecossistema. Consumir. Produzir. Descartar. O ciclo deve ser quebrado."},
@@ -34,7 +46,11 @@ BOSSES_DATA = {
             {"speaker": "SYSTEM", "text": "Início da batalha contra o Chefe da Sustentabilidade!"}
         ],
     },
+<<<<<<< Updated upstream
 
+=======
+    
+>>>>>>> Stashed changes
     "Matematica": {
         "nome": "Mago Místico",
         "bg_image": "imagens_game/corredor_matematica.png",
