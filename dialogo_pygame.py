@@ -164,7 +164,6 @@ DIALOGO_FIM = (
 
 
 def _replace_player_name(dialogo_data):
-    """Substitui 'Player' pelo nome atual do personagem em um diálogo."""
     resultado = []
     for speaker, text in dialogo_data:
         if speaker == "Player":
@@ -377,7 +376,6 @@ class CaixaDialogo:
         pygame.draw.rect(superficie_fundo, AZUL_CLARO, (0, 0, self.caixa_rect.width, self.caixa_rect.height), 3, border_radius=10)
         self.tela.blit(superficie_fundo, (self.caixa_rect.x, self.caixa_rect.y))
         
-        # Converter "System" para "Narrador"
         display_name = 'Narrador' if speaker_name == 'System' else speaker_name
         
         nome_renderizado = FONTE_NOME.render(display_name, True, BRANCO)

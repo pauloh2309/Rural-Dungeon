@@ -9,7 +9,6 @@ BASE_DIR = os.path.dirname(__file__)
 VOLUME_FILE = os.path.join(BASE_DIR, 'volume_config.json')
 
 def load_volume():
-    """Carrega o volume salvo ou retorna 0.6 como padrão."""
     try:
         if os.path.exists(VOLUME_FILE):
             with open(VOLUME_FILE, 'r', encoding='utf-8') as f:
@@ -20,7 +19,6 @@ def load_volume():
     return 0.6
 
 def save_volume(volume):
-    """Salva o volume atual."""
     try:
         with open(VOLUME_FILE, 'w', encoding='utf-8') as f:
             json.dump({'volume': max(0.0, min(1.0, volume))}, f, ensure_ascii=False, indent=2)
@@ -442,7 +440,6 @@ def run_battle(start_fase=0, heroi=None):
     pygame.display.set_caption("Rural Dungeon - Batalha")
     clock = pygame.time.Clock()
 
-    # Carregar volume salvo
     current_game_volume = load_volume()
     if mixer.music.get_busy():
         mixer.music.set_volume(current_game_volume)
@@ -466,7 +463,6 @@ def run_battle(start_fase=0, heroi=None):
     except Exception:
         trufa_icon = None
 
-    # Carregar ícone de volume
     volume_icon = None
     try:
         volume_icon_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'opção_botão.png')
@@ -517,7 +513,6 @@ def run_battle(start_fase=0, heroi=None):
         btn_special.draw(screen)
         btn_trufa.draw(screen)
 
-        # Desenhar ícone de volume e controle
         volume_icon_rect = None
         if volume_icon:
             volume_icon_x = WIDTH - 60
@@ -525,23 +520,19 @@ def run_battle(start_fase=0, heroi=None):
             screen.blit(volume_icon, (volume_icon_x, volume_icon_y))
             volume_icon_rect = pygame.Rect(volume_icon_x, volume_icon_y, 40, 40)
         
-        # Desenhar barra de volume quando houver clique próximo do ícone
         mouse_pos = pygame.mouse.get_pos()
         showing_volume = volume_icon_rect and volume_icon_rect.collidepoint(mouse_pos) if volume_icon_rect else False
         
-        if showing_volume or True:  # Sempre mostrar a barra
+        if showing_volume or True:
             volume_bar_x = WIDTH - 200
             volume_bar_y = 25
             volume_bar_width = 150
             
-            # Desenhar fundo da barra
             pygame.draw.rect(screen, (50, 50, 50), (volume_bar_x, volume_bar_y, volume_bar_width, 10), border_radius=5)
             
-            # Desenhar barra preenchida
             fill_width = volume_bar_width * current_game_volume
             pygame.draw.rect(screen, (100, 255, 100), (volume_bar_x, volume_bar_y, fill_width, 10), border_radius=5)
             
-            # Percentual de volume
             vol_font = pygame.font.SysFont(None, 16)
             vol_text = vol_font.render(f'{int(current_game_volume * 100)}%', True, (255, 255, 255))
             screen.blit(vol_text, (volume_bar_x - 30, volume_bar_y - 5))
@@ -563,7 +554,6 @@ def run_battle(start_fase=0, heroi=None):
             if e.type == pygame.MOUSEBUTTONDOWN and e.button == 1:
                 pos = e.pos
                 
-                # Controle de volume
                 volume_bar_x = WIDTH - 200
                 volume_bar_y = 25
                 volume_bar_width = 150
@@ -573,7 +563,6 @@ def run_battle(start_fase=0, heroi=None):
                     current_game_volume = (pos[0] - volume_bar_x) / volume_bar_width
                     current_game_volume = max(0.0, min(1.0, current_game_volume))
                     mixer.music.set_volume(current_game_volume)
-                    # Ajustar som dos efeitos também
                     for sound in sounds.values():
                         if isinstance(sound, pygame.mixer.Sound):
                             sound.set_volume(current_game_volume)

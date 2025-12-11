@@ -27,7 +27,6 @@ VOLUME_FILE = os.path.join(BASE_DIR, 'volume_config.json')
 
 
 def load_volume():
-    """Carrega o volume salvo ou retorna 0.6 como padrão."""
     try:
         if os.path.exists(VOLUME_FILE):
             with open(VOLUME_FILE, 'r', encoding='utf-8') as f:
@@ -39,7 +38,6 @@ def load_volume():
 
 
 def save_volume(volume):
-    """Salva o volume atual."""
     try:
         with open(VOLUME_FILE, 'w', encoding='utf-8') as f:
             json.dump({'volume': max(0.0, min(1.0, volume))}, f, ensure_ascii=False, indent=2)
@@ -152,7 +150,6 @@ def save_hero_individual(heroi, folder='heroes'):
 
 
 def save_all_hero_files(heroi):
-    """Persist hero data to all save files and return True on success."""
     try:
         save_heroi_to_file(heroi)
         save_personagem_file(heroi)
@@ -777,7 +774,6 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = event.pos
                 
-                # Controle de volume em qualquer estado (exceto OPTIONS)
                 if state != 'OPTIONS':
                     volume_bar_x = SCREEN_W - 200
                     volume_bar_y = 80
@@ -844,7 +840,6 @@ def main():
                     screen.blit(highlighted, (options_btn_x, options_btn_y))
                 screen.blit(options_img, (options_btn_x, options_btn_y))
             
-            # Desenhar barra de volume no MENU
             volume_bar_x = SCREEN_W - 200
             volume_bar_y = 80
             volume_bar_width = 150
