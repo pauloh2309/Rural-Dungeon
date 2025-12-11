@@ -152,6 +152,7 @@ def save_hero_individual(heroi, folder='heroes'):
 
 
 def save_all_hero_files(heroi):
+    """Persist hero data to all save files and return True on success."""
     try:
         save_heroi_to_file(heroi)
         save_personagem_file(heroi)
