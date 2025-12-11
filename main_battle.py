@@ -507,7 +507,7 @@ def run_battle(start_fase=0, heroi=None):
         screen.blit(font.render("Especial", True, (255, 255, 255)), (350, 560))
 
         trufas_rest = max(0, 5 - getattr(player, 'trufas_used', 0))
-        screen.blit(font.render(f"Trufas: {trufas_rest}/5", True, (255, 255, 255)), (650, 560))
+        screen.blit(font.render(f"Trufas: {trufas_rest}/5", True, (255, 255, 255)), (650, 545))
 
         btn_attack.draw(screen)
         btn_special.draw(screen)

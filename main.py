@@ -215,7 +215,7 @@ def hero_creation_screen(screen):
 
     buttons = {}
     start_x = 100
-    start_y = 200
+    start_y = 300
     gap_y = 60
     for i, key in enumerate(stats.keys()):
         y = start_y + i * gap_y
@@ -257,36 +257,44 @@ def hero_creation_screen(screen):
                 return None
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 pos = event.pos
+                button_clicked = False
+                
                 for key in stats.keys():
-                    if buttons[f'{key}_plus'].is_clicked(pos):
-                        used = sum(int(stat_inputs[k]) if stat_inputs.get(k, '') != '' else 0 for k in stats.keys())
-                        if used < total_points:
-                            stats[key] += 1
-                            stat_inputs[key] = str(stats[key])
-                    if buttons[f'{key}_minus'].is_clicked(pos):
-                        if stats[key] > min_stat:
-                            stats[key] -= 1
-                            stat_inputs[key] = str(stats[key])
+                    if not button_clicked:
+                        if buttons[f'{key}_plus'].is_clicked(pos):
+                            used = sum(int(stat_inputs[k]) if stat_inputs.get(k, '') != '' else 0 for k in stats.keys())
+                            if used < total_points:
+                                stats[key] += 1
+                                stat_inputs[key] = str(stats[key])
+                            button_clicked = True
+                        elif buttons[f'{key}_minus'].is_clicked(pos):
+                            if stats[key] > min_stat:
+                                stats[key] -= 1
+                                stat_inputs[key] = str(stats[key])
+                            button_clicked = True
 
                 name_rect = Rect(50, 110, 400, 40)
                 if name_rect.collidepoint(pos):
                     name_active = True
                     input_modal_active = False
                     input_text = ''
+                    button_clicked = True
                 else:
                     name_active = False
 
-                for i, key in enumerate(stats.keys()):
-                    y = start_y + i * gap_y
-                    label_rect = Rect(start_x, y, 360, 32)
-                    if label_rect.collidepoint(pos):
-                        active_stat = key
-                        stat_inputs[active_stat] = str(stats[active_stat])
-                        input_modal_active = True
-                        input_text = stat_inputs[active_stat]
-                        message = f'Editando {active_stat}. Digite valor e pressione Enter.'
-                        msg_timer = 120
-                        break
+                if not button_clicked:
+                    for i, key in enumerate(stats.keys()):
+                        y = start_y + i * gap_y
+                        num_rect = Rect(start_x + 150, y, 80, 32)
+                        if num_rect.collidepoint(pos):
+                            active_stat = key
+                            stat_inputs[active_stat] = str(stats[active_stat])
+                            input_modal_active = True
+                            input_text = stat_inputs[active_stat]
+                            message = f'Editando {active_stat}. Digite valor e pressione Enter.'
+                            msg_timer = 120
+                            button_clicked = True
+                            break
 
                 if confirm_btn.is_clicked(pos):
                     used = sum(stats.values())
@@ -526,7 +534,7 @@ def character_select_screen(screen):
                     return 'maria'
 
         try:
-            bg_path = os.path.join(os.path.dirname(__file__), 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
+            bg_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'imagem_reitoria_fogo.jpg')
             if os.path.exists(bg_path):
                 bg = pygame.image.load(bg_path).convert()
                 bg = pygame.transform.smoothscale(bg, (SCREEN_W, SCREEN_H))
@@ -549,6 +557,68 @@ def character_select_screen(screen):
             screen.blit(mar_img, (btn_maria.x + 10, btn_maria.y + 10))
         txt2 = font.render('Feminino', True, WHITE)
         screen.blit(txt2, (btn_maria.x + (btn_maria.width - txt2.get_width()) // 2, btn_maria.y + btn_maria.height - 40))
+
+        pygame.display.flip()
+
+
+def intro_screen(screen):
+    clock = pygame.time.Clock()
+    try:
+        base = os.path.dirname(__file__)
+        img_path = os.path.join(base, 'imagens_game', 'imagem_reitoria.jpg')
+        if not os.path.exists(img_path):
+            img_path = os.path.join(base, 'imagens_game', 'imagem_reitoria_fogo.jpg')
+        intro_img = None
+        if os.path.exists(img_path):
+            try:
+                intro_img = pygame.image.load(img_path).convert()
+                intro_img = pygame.transform.smoothscale(intro_img, (SCREEN_W, SCREEN_H))
+            except Exception:
+                intro_img = None
+    except Exception:
+        intro_img = None
+
+    logo_img = None
+    try:
+        base = os.path.dirname(__file__)
+        logo_path = os.path.join(base, 'imagens_game', 'rural_dungeon_logo.png')
+        if os.path.exists(logo_path):
+            logo_img = pygame.image.load(logo_path).convert_alpha()
+            logo_w = int(SCREEN_W * 0.4)
+            logo_h = int(logo_img.get_height() * (logo_w / logo_img.get_width()))
+            logo_img = pygame.transform.smoothscale(logo_img, (logo_w, logo_h))
+    except Exception:
+        logo_img = None
+
+    font = pygame.font.SysFont(None, 56)
+    blink_timer = 0
+    blink_visible = True
+
+    while True:
+        clock.tick(FPS)
+        blink_timer += 1
+        if blink_timer >= 30:
+            blink_timer = 0
+            blink_visible = not blink_visible
+
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                return False
+            if e.type == pygame.KEYDOWN or (e.type == pygame.MOUSEBUTTONDOWN and e.button == 1):
+                return True
+
+        if intro_img:
+            screen.blit(intro_img, (0, 0))
+        else:
+            screen.fill((0, 0, 0))
+
+        if logo_img:
+            logo_x = (SCREEN_W - logo_img.get_width()) // 2
+            screen.blit(logo_img, (logo_x, 20))
+
+        if blink_visible:
+            txt = font.render('Pressione qualquer tecla para continuar', True, WHITE)
+            screen.blit(txt, ((SCREEN_W - txt.get_width()) // 2, SCREEN_H - 150))
 
         pygame.display.flip()
 
@@ -740,12 +810,12 @@ def main():
     pygame.display.set_caption('Rural Dungeon - Menu')
     clock = pygame.time.Clock()
 
-    btn_width, btn_height = 360, 84
+    btn_width, btn_height = 240, 56
     btn_x = (SCREEN_W - btn_width) // 2
-    spacing = 28
-    start_btn = Button((btn_x, 220, btn_width, btn_height), 'Comecar Jogo', GREEN)
-    select_btn = Button((btn_x, 220 + btn_height + spacing, btn_width, btn_height), 'Selecionar Herói', BLUE)
-    exit_btn = Button((btn_x, 220 + 2 * (btn_height + spacing), btn_width, btn_height), 'Sair', RED)
+    spacing = 16
+    start_btn = Button((btn_x, 500, btn_width, btn_height), 'Comecar Jogo', GREEN)
+    select_btn = Button((btn_x, 500 + btn_height + spacing, btn_width, btn_height), 'Selecionar Herói', BLUE)
+    exit_btn = Button((btn_x, 500 + 2 * (btn_height + spacing), btn_width, btn_height), 'Sair', RED)
 
     options_btn_size = 64
     options_btn_x = SCREEN_W - options_btn_size - 20
@@ -766,6 +836,13 @@ def main():
     heroi_obj = None
 
     running = True
+    try:
+        proceed = intro_screen(screen)
+        if not proceed:
+            pygame.quit()
+            return
+    except Exception:
+        pass
     while running:
         clock.tick(FPS)
         for event in pygame.event.get():
@@ -814,7 +891,7 @@ def main():
         if state == 'MENU':
             menu_bg = None
             try:
-                bg_path = os.path.join(os.path.dirname(__file__), 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
+                bg_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'imagem_reitoria_fogo.jpg')
                 if os.path.exists(bg_path):
                     menu_bg = pygame.image.load(bg_path).convert()
                     menu_bg = pygame.transform.smoothscale(menu_bg, (SCREEN_W, SCREEN_H))
@@ -826,7 +903,22 @@ def main():
             else:
                 screen.fill((30, 30, 50))
 
-            draw_text(screen, 'Rural Dungeon', 80, 320, 150, color=WHITE)
+            logo_img = None
+            try:
+                base = os.path.dirname(__file__)
+                logo_path = os.path.join(base, 'imagens_game', 'rural_dungeon_logo.png')
+                if os.path.exists(logo_path):
+                    logo_img = pygame.image.load(logo_path).convert_alpha()
+                    logo_w = int(SCREEN_W * 0.4)
+                    logo_h = int(logo_img.get_height() * (logo_w / logo_img.get_width()))
+                    logo_img = pygame.transform.smoothscale(logo_img, (logo_w, logo_h))
+            except Exception:
+                logo_img = None
+
+            if logo_img:
+                logo_x = (SCREEN_W - logo_img.get_width()) // 2
+                screen.blit(logo_img, (logo_x, 20))
+
             mx, my = pygame.mouse.get_pos()
             start_btn.draw(screen, mouse_pos=(mx, my))
             select_btn.draw(screen, mouse_pos=(mx, my))
@@ -857,7 +949,7 @@ def main():
         elif state == 'OPTIONS':
             menu_bg = None
             try:
-                bg_path = os.path.join(os.path.dirname(__file__), 'Imagens_dialogos', 'e378a975-e5d9-4162-98be-a6693a7d818a.jpg')
+                bg_path = os.path.join(os.path.dirname(__file__), 'imagens_game', 'imagem_reitoria_fogo.jpg')
                 if os.path.exists(bg_path):
                     menu_bg = pygame.image.load(bg_path).convert()
                     menu_bg = pygame.transform.smoothscale(menu_bg, (SCREEN_W, SCREEN_H))

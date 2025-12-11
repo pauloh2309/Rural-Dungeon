@@ -266,7 +266,7 @@ class CaixaDialogo:
             pass
 
         try:
-            cleyton_path = os.path.join(base, 'imagens_game', 'cleyton-removebg.png')
+            cleyton_path = os.path.join(base, 'imagens_game', 'cleyton_sembg.png')
             if os.path.exists(cleyton_path):
                 self.cleyton_img = pygame.image.load(cleyton_path).convert_alpha()
                 self.cleyton_img = pygame.transform.smoothscale(self.cleyton_img, (300, 400))
