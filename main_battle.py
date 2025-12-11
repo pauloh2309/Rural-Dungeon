@@ -635,7 +635,6 @@ def run_battle(start_fase=0, heroi=None):
                         current_heroi.vida = getattr(current_heroi, 'vidabase', getattr(current_heroi, 'vida', player.max_hp))
                 except Exception:
                     pass
-                # Reinicia a luta na mesma fase (não volta ao primeiro adversário)
                 carregar_fase()
                 turno_jogador = True
                 esperando = False
